@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reputation Watch — Austin Family Dentistry</title>
+<style>
+  :root {
+    --brand:        #0f766e;   /* teal — matches practice site */
+    --brand-dark:   #0b544e;
+    --brand-tint:   #e6f2f0;
+    --surface-1:    #ffffff;
+    --page:         #f4f6f6;
+    --ink:          #10201e;
+    --ink-2:        #4b5b58;
+    --muted:        #7d8b88;
+    --hairline:     rgba(16,32,30,0.10);
+    --good:         #0ca30c;
+    --warning:      #d98a00;
+    --critical:     #d03b3b;
+    --good-tint:    #e7f6e7;
+    --warn-tint:    #fbf1dd;
+    --crit-tint:    #fbe6e6;
+    --radius:       14px;
+    --shadow:       0 1px 2px rgba(16,32,30,.06), 0 8px 24px rgba(16,32,30,.05);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 64px; }
+
+  /* Header */
+  header.topbar {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    color: #fff;
+    padding: 22px 0 26px;
+  }
+  .topbar-inner {
+    max-width: 1080px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .logo {
+    width: 52px; height: 52px; border-radius: 12px; flex: none;
+    background: rgba(255,255,255,.15);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 20px; letter-spacing: .5px;
+    border: 1px solid rgba(255,255,255,.25);
+  }
+  .brand-block h1 { font-size: 19px; margin: 0; font-weight: 650; }
+  .brand-block .sub { font-size: 13px; opacity: .85; margin-top: 2px; }
+  .topbar-meta { margin-left: auto; text-align: right; font-size: 12.5px; opacity: .9; }
+  .topbar-meta .kicker { text-transform: uppercase; letter-spacing: 1.5px; font-size: 10.5px; opacity: .8; }
+  .topbar-meta strong { font-size: 14px; font-weight: 600; }
+
+  /* Sample-data banner */
+  .demo-banner {
+    background: var(--warn-tint); color: #7a5200;
+    font-size: 12.5px; text-align: center; padding: 7px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+  }
+
+  section { margin-top: 30px; }
+  h2.section-title {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); font-weight: 650; margin: 0 0 14px;
+  }
+
+  /* Sentiment summary */
+  .summary-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--hairline);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+  }
+  .score-row { display: flex; align-items: baseline; gap: 14px; }
+  .score-big { font-size: 46px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+  .stars { color: #eaa100; font-size: 20px; letter-spacing: 2px; }
+  .score-sub { color: var(--ink-2); font-size: 13.5px; margin-top: 6px; }
+
+  .sentiment-bar { display: flex; height: 16px; border-radius: 8px; overflow: hidden; margin: 18px 0 12px; gap: 2px; }
+  .sentiment-bar span { display: block; }
+  .seg-pos { background: var(--good); }
+  .seg-neu { background: #c9d2d0; }
+  .seg-neg { background: var(--critical); }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; }
+  .legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  /* Platform tiles */
+  .platforms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .ptile {
+    background: var(--surface-1); border: 1px solid var(--hairline);
+    border-radius: var(--radius); padding: 15px; box-shadow: var(--shadow);
+  }
+  .ptile .pname { font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: flex; align-items: center; gap: 7px; }
+  .pmark { width: 20px; height: 20px; border-radius: 5px; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 700; flex: none; }
+  .ptile .prate { font-size: 26px; font-weight: 700; margin-top: 8px; }
+  .ptile .prate small { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .ptile .pcount { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ptile a { font-size: 12px; color: var(--brand); text-decoration: none; font-weight: 600; display: inline-block; margin-top: 8px; }
+  .ptile a:hover { text-decoration: underline; }
+
+  /* Alerts */
+  .alert {
+    background: var(--surface-1); border: 1px solid var(--hairline);
+    border-left: 4px solid var(--critical);
+    border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px;
+  }
+  .alert.warn { border-left-color: var(--warning); }
+  .alert-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .badge-crit { background: var(--crit-tint); color: var(--critical); }
+  .badge-warn { background: var(--warn-tint); color: #9a6a00; }
+  .alert-plat { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .alert-title { font-weight: 650; margin: 10px 0 2px; font-size: 15px; }
+  .alert-meta { font-size: 12.5px; color: var(--muted); }
+  .alert-body { margin: 10px 0 0; color: var(--ink-2); font-size: 14px; }
+  .rev-stars { color: #eaa100; letter-spacing: 1px; font-size: 13px; }
+
+  .response {
+    margin-top: 14px; background: var(--brand-tint);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .response .rlabel {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+    color: var(--brand-dark); display: flex; align-items: center; gap: 7px; margin-bottom: 7px;
+  }
+  .response p { margin: 0; font-size: 13.5px; color: #17332f; line-height: 1.55; }
+  .response .actions { margin-top: 10px; display: flex; gap: 8px; }
+  .btn {
+    font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--brand); background: #fff; color: var(--brand); cursor: pointer;
+  }
+  .btn.primary { background: var(--brand); color: #fff; }
+
+  /* Recent reviews list */
+  .rev { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius);
+         padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .rev-top { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--brand-tint); color: var(--brand-dark);
+            display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+  .rev-name { font-weight: 600; font-size: 14px; }
+  .rev-sub { font-size: 12px; color: var(--muted); }
+  .chip { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; margin-left: auto; }
+  .chip-pos { background: var(--good-tint); color: #0a7a0a; }
+  .chip-neu { background: #eef1f0; color: #5a6b68; }
+  .chip-neg { background: var(--crit-tint); color: var(--critical); }
+  .rev-text { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); }
+  .rev-plat { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+
+  footer.foot { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--hairline);
+                font-size: 12px; color: var(--muted); text-align: center; }
+
+  @media (max-width: 760px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .platforms { grid-template-columns: repeat(2, 1fr); }
+    .topbar-meta { margin-left: 0; text-align: left; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="demo-banner">
+  Demo dashboard — brand and links belong to a real practice (Austin Family Dentistry, North Austin TX). Review text and ratings shown here are <strong>illustrative sample data</strong> for demonstration.
+</div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">AFD</div>
+    <div class="brand-block">
+      <h1>Austin Family Dentistry</h1>
+      <div class="sub">Reputation Watch · Dr. Kara Diemer, DDS &amp; team · North Austin, TX</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="kicker">Reporting period</div>
+      <strong>Last 30 days</strong><br>
+      <span>Updated Aug 18, 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SENTIMENT SUMMARY -->
+  <section>
+    <h2 class="section-title">Overall Sentiment</h2>
+    <div class="summary-grid">
+      <div class="card">
+        <div class="score-row">
+          <div class="score-big">4.6</div>
+          <div>
+            <div class="stars">★★★★<span style="opacity:.4">★</span></div>
+            <div class="score-sub">Aggregate across 4 platforms · 218 total reviews</div>
+          </div>
+        </div>
+        <div class="sentiment-bar" role="img" aria-label="82% positive, 11% neutral, 7% negative">
+          <span class="seg-pos" style="width:82%"></span>
+          <span class="seg-neu" style="width:11%"></span>
+          <span class="seg-neg" style="width:7%"></span>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--good)"></span>Positive · 82%</span>
+          <span><span class="dot" style="background:#c9d2d0"></span>Neutral · 11%</span>
+          <span><span class="dot" style="background:var(--critical)"></span>Negative · 7%</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;">This period</div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:14px;">
+          <span style="color:var(--ink-2)">New reviews</span><strong>17</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:14px;">
+          <span style="color:var(--ink-2)">Avg. rating (30d)</span><strong style="color:var(--good)">4.7 ▲</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:14px;">
+          <span style="color:var(--ink-2)">Needs a response</span><strong style="color:var(--critical)">3</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:14px;">
+          <span style="color:var(--ink-2)">Responded</span><strong>12 / 17</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM BREAKDOWN -->
+  <section>
+    <h2 class="section-title">By Platform</h2>
+    <div class="platforms">
+      <div class="ptile">
+        <div class="pname"><span class="pmark" style="background:#4285F4">G</span>Google</div>
+        <div class="prate">4.8 <small>★</small></div>
+        <div class="pcount">126 reviews</div>
+        <a href="https://maps.app.goo.gl/GPyNaVBRgWNgP6ht5" target="_blank" rel="noopener">View on Google →</a>
+      </div>
+      <div class="ptile">
+        <div class="pname"><span class="pmark" style="background:#d32323">Y</span>Yelp</div>
+        <div class="prate">4.0 <small>★</small></div>
+        <div class="pcount">34 reviews</div>
+        <a href="https://www.yelp.com/biz/austin-family-dentistry-austin-10" target="_blank" rel="noopener">View on Yelp →</a>
+      </div>
+      <div class="ptile">
+        <div class="pname"><span class="pmark" style="background:#0f4c81">H</span>Healthgrades</div>
+        <div class="prate">4.5 <small>★</small></div>
+        <div class="pcount">29 reviews</div>
+        <a href="https://www.healthgrades.com/find-a-doctor/texas/best-dentists-in-austin" target="_blank" rel="noopener">View on Healthgrades →</a>
+      </div>
+      <div class="ptile">
+        <div class="pname"><span class="pmark" style="background:#1877F2">f</span>Facebook</div>
+        <div class="prate">4.7 <small>★</small></div>
+        <div class="pcount">29 recommendations</div>
+        <a href="https://www.facebook.com/austinfamilydentistry2022/" target="_blank" rel="noopener">View on Facebook →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALERTS: NEGATIVE REVIEWS + DRAFTED RESPONSES -->
+  <section>
+    <h2 class="section-title">⚠ Alerts — Negative Reviews Needing a Response (3)</h2>
+
+    <div class="alert">
+      <div class="alert-head">
+        <span class="badge badge-crit">Negative · 1★</span>
+        <span class="alert-plat">Yelp · 2 days ago</span>
+      </div>
+      <div class="alert-title">"Waited 50 minutes past my appointment time"</div>
+      <div class="alert-meta">Marcus T. · <span class="rev-stars">★<span style="opacity:.3">★★★★</span></span></div>
+      <p class="alert-body">Booked a 9am cleaning and wasn't taken back until almost 10. No one said anything or apologized. The hygienist was nice once I was in the chair, but I took time off work for this and the front desk didn't seem to care about the delay.</p>
+      <div class="response">
+        <div class="rlabel">✎ Drafted response — review before posting</div>
+        <p>Hi Marcus, thank you for telling us about this — and I'm sorry. A 50-minute wait when you'd set aside work time is not the experience we want anyone to have, and you're right that we should have kept you informed. I've shared your note with our front-desk team so we can tighten how we communicate delays. I'd genuinely like to make it right; please reach me directly at admin@austinfamilydds.com or 512-218-1130 and ask for the office manager. — Dr. Kara Diemer, Austin Family Dentistry</p>
+        <div class="actions">
+          <button class="btn primary">Approve &amp; copy</button>
+          <button class="btn">Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert">
+      <div class="alert-head">
+        <span class="badge badge-crit">Negative · 2★</span>
+        <span class="alert-plat">Google · 5 days ago</span>
+      </div>
+      <div class="alert-title">"Surprised by the bill after insurance"</div>
+      <div class="alert-meta">Priya S. · <span class="rev-stars">★★<span style="opacity:.3">★★★</span></span></div>
+      <p class="alert-body">The care was fine but I was told a procedure would be mostly covered and then got a bill for almost $400. I wish the cost had been explained clearly up front. Feels like a bait and switch even if it wasn't intended.</p>
+      <div class="response">
+        <div class="rlabel">✎ Drafted response — review before posting</div>
+        <p>Hi Priya, thank you for the feedback, and I'm sorry the cost caught you off guard — that's a frustrating way to leave an appointment. Clear estimates before treatment are something we care a lot about, so it's important to us to understand where the gap happened in your case. Insurance estimates can shift once a claim is processed, but you deserved a clearer picture up front. Please contact our office manager at admin@austinfamilydds.com or 512-218-1130 and we'll walk through your account line by line. — Austin Family Dentistry</p>
+        <div class="actions">
+          <button class="btn primary">Approve &amp; copy</button>
+          <button class="btn">Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert warn">
+      <div class="alert-head">
+        <span class="badge badge-warn">Mixed · 3★</span>
+        <span class="alert-plat">Healthgrades · 9 days ago</span>
+      </div>
+      <div class="alert-title">"Good dentist, hard to reach by phone"</div>
+      <div class="alert-meta">Dana R. · <span class="rev-stars">★★★<span style="opacity:.3">★★</span></span></div>
+      <p class="alert-body">Dr. Diemer herself is great and thorough. My only issue is that I called three times to reschedule and kept getting voicemail, and no one called me back for two days. Almost gave up and went elsewhere.</p>
+      <div class="response">
+        <div class="rlabel">✎ Drafted response — review before posting</div>
+        <p>Hi Dana, thank you — I'm glad your visit with Dr. Diemer went well, and I'm sorry the phones let you down when you were trying to reschedule. Two days without a callback isn't acceptable, and we're reviewing how we handle voicemail during busy stretches. If you still need to adjust your appointment, please email admin@austinfamilydds.com and we'll take care of it the same day. Thank you for sticking with us. — Austin Family Dentistry</p>
+        <div class="actions">
+          <button class="btn primary">Approve &amp; copy</button>
+          <button class="btn">Edit draft</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENT REVIEWS -->
+  <section>
+    <h2 class="section-title">Recent Reviews — All Platforms</h2>
+
+    <div class="rev">
+      <div class="rev-top">
+        <div class="avatar">JL</div>
+        <div>
+          <div class="rev-name">Jennifer L.</div>
+          <div class="rev-sub"><span class="rev-stars">★★★★★</span> · 1 day ago</div>
+        </div>
+        <span class="chip chip-pos">Positive</span>
+      </div>
+      <p class="rev-text">Best dental experience I've had in Austin. They actually explained my treatment plan with a printout and never pushed anything unnecessary. Dr. Diemer takes her time.</p>
+      <div class="rev-plat">Google</div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-top">
+        <div class="avatar">MT</div>
+        <div>
+          <div class="rev-name">Marcus T.</div>
+          <div class="rev-sub"><span class="rev-stars">★<span style="opacity:.3">★★★★</span></span> · 2 days ago</div>
+        </div>
+        <span class="chip chip-neg">Negative</span>
+      </div>
+      <p class="rev-text">Booked a 9am cleaning and wasn't taken back until almost 10. No one apologized for the delay.</p>
+      <div class="rev-plat">Yelp</div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-top">
+        <div class="avatar">RG</div>
+        <div>
+          <div class="rev-name">Robert G.</div>
+          <div class="rev-sub"><span class="rev-stars">★★★★★</span> · 3 days ago</div>
+        </div>
+        <span class="chip chip-pos">Positive</span>
+      </div>
+      <p class="rev-text">Front desk was warm, the office is spotless and calm, and the periodontist they have on staff caught something my old dentist missed. Highly recommend.</p>
+      <div class="rev-plat">Facebook</div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-top">
+        <div class="avatar">DR</div>
+        <div>
+          <div class="rev-name">Dana R.</div>
+          <div class="rev-sub"><span class="rev-stars">★★★<span style="opacity:.3">★★</span></span> · 9 days ago</div>
+        </div>
+        <span class="chip chip-neu">Mixed</span>
+      </div>
+      <p class="rev-text">Dr. Diemer herself is great and thorough. Only issue is that they're hard to reach by phone.</p>
+      <div class="rev-plat">Healthgrades</div>
+    </div>
+
+    <div class="rev">
+      <div class="rev-top">
+        <div class="avatar">SW</div>
+        <div>
+          <div class="rev-name">Sofia W.</div>
+          <div class="rev-sub"><span class="rev-stars">★★★★★</span> · 11 days ago</div>
+        </div>
+        <span class="chip chip-pos">Positive</span>
+      </div>
+      <p class="rev-text">I have a lot of dental anxiety and they were so patient with me. Walked me through every step. First time I haven't dreaded a cleaning.</p>
+      <div class="rev-plat">Google</div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    Reputation Watch · Austin Family Dentistry · 13915 N Mopac Expy #110, Austin, TX 78728 · 512-218-1130 · admin@austinfamilydds.com<br>
+    Sample demonstration dashboard. Ratings and review text are illustrative. Brand, address and links reflect the real practice.
+  </footer>
+</div>
+</body>
+</html>
