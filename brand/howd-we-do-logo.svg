@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+  <defs><linearGradient id="honey" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2B34E"/><stop offset="1" stop-color="#E0932C"/></linearGradient></defs>
+  <rect x="24" y="40" width="104" height="104" rx="32" fill="url(#honey)"/>
+  <path d="M56 68 h40 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-14 l-12 12 v-12 h-14 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12 z" fill="#ffffff"/>
+  <circle cx="70" cy="86" r="3.6" fill="#E0932C"/><circle cx="90" cy="86" r="3.6" fill="#E0932C"/>
+  <path d="M68 96 a12 12 0 0 0 24 0" fill="none" stroke="#E0932C" stroke-width="5" stroke-linecap="round"/>
+  <text x="150" y="100" font-size="50" font-weight="700" fill="#3a2a12" letter-spacing="-0.5">How'd we do?</text>
+  <text x="152" y="130" font-size="15" font-weight="500" letter-spacing="1.5" fill="#9a7b4a">A QUICK WORD AFTER YOUR VISIT</text>
+</svg>

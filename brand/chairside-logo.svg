@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+  <defs><linearGradient id="teal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f8378"/><stop offset="1" stop-color="#0b544e"/></linearGradient></defs>
+  <rect x="24" y="40" width="104" height="104" rx="26" fill="url(#teal)"/>
+  <path d="M56 68 h40 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-14 l-12 12 v-12 h-14 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12 z" fill="#ffffff"/>
+  <path d="M66 90 l8 8 l16 -17" fill="none" stroke="#0f766e" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="150" y="102" font-size="52" font-weight="600" fill="#10201e" letter-spacing="-1">chairside</text>
+  <text x="152" y="130" font-size="15" font-weight="600" letter-spacing="3" fill="#7d8b88">PATIENT FEEDBACK</text>
+</svg>
