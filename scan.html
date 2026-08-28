@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How'd we do?</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+  :root{
+    --brand:#0f766e; --brand-dark:#0b544e; --brand-tint:#e6f2f0;
+    --ink:#10201e; --ink-2:#4b5b58; --muted:#7d8b88;
+    --surface:#ffffff; --page:#eef3f2; --hairline:rgba(16,32,30,.10);
+    --good:#0ca30c; --crit:#d03b3b; --radius:16px;
+    /* How'd we do? — patient-facing honey accent (Chairside vendor stays teal) */
+    --honey1:#F2B34E; --honey2:#E0932C; --honey-ink:#3a2a12; --honey-muted:#9a7b4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--page); color:var(--ink); line-height:1.5;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .demo-tag{
+    width:100%; background:#fbf1dd; color:#7a5200; font-size:12px;
+    text-align:center; padding:6px 10px;
+  }
+  .phone{
+    width:100%; max-width:440px; margin:0 auto; padding:0 20px 40px;
+    flex:1; display:flex; flex-direction:column;
+  }
+  header.brand{
+    text-align:center; padding:34px 0 22px;
+  }
+  .logo{
+    width:68px; height:68px; border-radius:16px; margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    color:#fff; display:grid; place-items:center; font-weight:700; font-size:22px;
+    box-shadow:0 8px 20px rgba(15,118,110,.28);
+  }
+  .brand h1{font-size:30px; margin:0; font-weight:700; letter-spacing:-.4px; line-height:1.15;}
+  .brand .doc{font-size:13.5px; color:var(--muted); margin-top:3px;}
+  /* "How'd we do?" honey question — sits under the dentist's brand, never above it */
+  .howdwedo{font-size:21px; font-weight:700; text-align:center; margin:0 0 4px; color:var(--honey-ink); display:flex; align-items:center; justify-content:center; gap:8px;}
+  .howdwedo svg{flex:none;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--hairline);
+    border-radius:var(--radius); box-shadow:0 2px 4px rgba(16,32,30,.05),0 12px 32px rgba(16,32,30,.06);
+    padding:28px 24px;
+  }
+  .screen{display:none;}
+  .screen.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .prompt{font-size:20px; font-weight:650; text-align:center; margin:0 0 4px;}
+  .sub{font-size:14px; color:var(--ink-2); text-align:center; margin:0 0 24px;}
+
+  .choice{display:grid; gap:12px;}
+  .bigbtn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size:17px; font-weight:600; padding:18px; border-radius:14px;
+    border:1px solid var(--hairline); background:#fff; color:var(--ink);
+    cursor:pointer; transition:transform .08s, box-shadow .15s, border-color .15s;
+  }
+  .bigbtn:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(16,32,30,.08);}
+  .bigbtn .emo{font-size:22px;}
+  .bigbtn.happy{border-color:#bfe3d9;}
+  .bigbtn.happy:hover{border-color:var(--brand);}
+  .bigbtn.sad:hover{border-color:#e6a9a9;}
+
+  .cta{
+    display:block; width:100%; text-align:center; text-decoration:none;
+    font-size:17px; font-weight:650; padding:16px; border-radius:14px;
+    background:var(--brand); color:#fff; cursor:pointer; border:none;
+    box-shadow:0 8px 20px rgba(15,118,110,.28);
+  }
+  .cta:hover{background:var(--brand-dark);}
+  .gicon{width:20px;height:20px;vertical-align:-4px;margin-right:8px;}
+
+  label{display:block; font-size:13px; font-weight:600; color:var(--ink-2); margin:16px 0 6px;}
+  textarea,input{
+    width:100%; font-family:inherit; font-size:15px; padding:12px 14px;
+    border:1px solid var(--hairline); border-radius:12px; background:#fbfdfc; color:var(--ink);
+  }
+  textarea{min-height:110px; resize:vertical;}
+  input:focus,textarea:focus{outline:2px solid var(--brand-tint); border-color:var(--brand);}
+  .hint{font-size:12px; color:var(--muted); margin-top:5px;}
+
+  .success{text-align:center; padding:6px 0;}
+  .check{
+    width:66px;height:66px;border-radius:50%; margin:6px auto 16px;
+    background:var(--good); color:#fff; display:grid; place-items:center; font-size:34px;
+  }
+  .softlink{display:block; text-align:center; margin-top:20px; font-size:12.5px; color:var(--muted);}
+  .softlink a{color:var(--muted); text-decoration:underline;}
+  .back{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:18px;display:block;width:100%;}
+  footer.legal{margin-top:22px; text-align:center; font-size:11.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="demo-tag" id="demoBanner">Preview — backend not connected yet, so feedback isn't sent anywhere. Set <code>API_BASE</code> to go live.</div>
+<div class="phone">
+  <header class="brand">
+    <h1 id="pName">&nbsp;</h1>
+    <div class="doc" id="pDoc" style="display:none"></div>
+  </header>
+
+  <div class="card">
+    <!-- SCREEN 1: ASK -->
+    <div class="screen active" id="s-ask">
+      <div class="howdwedo">
+        <svg viewBox="0 0 104 104" width="24" height="24" aria-hidden="true">
+          <defs><linearGradient id="hny" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2B34E"/><stop offset="1" stop-color="#E0932C"/></linearGradient></defs>
+          <rect width="104" height="104" rx="30" fill="url(#hny)"/>
+          <path d="M32 28 h40 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-14 l-12 12 v-12 h-14 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12 z" fill="#ffffff"/>
+          <circle cx="46" cy="46" r="3.6" fill="#E0932C"/><circle cx="66" cy="46" r="3.6" fill="#E0932C"/>
+          <path d="M44 56 a12 12 0 0 0 24 0" fill="none" stroke="#E0932C" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        How'd we do?
+      </div>
+      <p class="sub">Your feedback helps us take better care of you.</p>
+      <div class="choice">
+        <button class="bigbtn happy" onclick="go('happy')"><span class="emo">😊</span> I had a good experience</button>
+        <button class="bigbtn sad" onclick="go('sad')"><span class="emo">😕</span> Something wasn't right</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: HAPPY → GOOGLE -->
+    <div class="screen" id="s-happy">
+      <p class="prompt">That's wonderful to hear! 🎉</p>
+      <p class="sub">Would you take a moment to share a quick Google review?<span id="doctorNudge"></span></p>
+      <a class="cta" id="googleCta" href="#" target="_blank" rel="noopener" onclick="track('google')">
+        <svg class="gicon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z" opacity=".0"/><path fill="#fff" d="M24 19v6h8.4c-.9 2.7-3.4 4.6-6.4 4.6-3.9 0-7-3.1-7-7s3.1-7 7-7c1.7 0 3.3.6 4.5 1.7L34 14C31.9 12.1 28.6 11 24 11c-7.2 0-13 5.8-13 13s5.8 13 13 13c7.5 0 12.4-5.3 12.4-12.7 0-.9-.1-1.6-.2-2.3H24z"/></svg>
+        Write a Google review
+      </a>
+      <span class="softlink">Thanks for helping other patients find us.</span>
+      <button class="back" onclick="go('ask')">← Back</button>
+    </div>
+
+    <!-- SCREEN 3: SAD → PRIVATE FORM -->
+    <div class="screen" id="s-sad">
+      <p class="prompt">We're sorry to hear that.</p>
+      <p class="sub">Tell us what happened and it goes straight to the office — privately. We read every note.</p>
+      <form onsubmit="submitComplaint(event)">
+        <label for="msg">What went wrong?</label>
+        <textarea id="msg" required placeholder="Tell us in your own words…"></textarea>
+        <label for="name">Your name <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input id="name" type="text" placeholder="So we can follow up with you">
+        <label for="contact">Phone or email <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input id="contact" type="text" placeholder="Best way to reach you">
+        <button class="cta" type="submit" style="margin-top:20px;">Send privately to the office</button>
+      </form>
+      <span class="softlink">Prefer to post publicly instead? <a id="googleSoft" href="#" target="_blank" rel="noopener">Leave a Google review</a>.</span>
+      <button class="back" onclick="go('ask')">← Back</button>
+    </div>
+
+    <!-- SCREEN 4: THANK YOU -->
+    <div class="screen" id="s-done">
+      <div class="success">
+        <div class="check">✓</div>
+        <p class="prompt">Thank you.</p>
+        <p class="sub">The office will personally look into this. If you left your contact details, someone will reach out.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="legal">
+    We ask every patient for honest feedback. <span style="opacity:.85">Powered by Chairside</span>
+  </footer>
+</div>
+
+<script>
+  /* ============================================================
+     CONFIG — set these two after you deploy the API (see api/BACKEND-SETUP.md)
+     - API_BASE: your Worker URL, e.g. "https://reputation-watch-api.<you>.workers.dev"
+                 Leave "" to keep this page in demo mode (logs to console, no network).
+     - SLUG:     which practice this QR belongs to. Can also be passed in the URL as ?p=slug
+     ============================================================ */
+  const API_BASE = "https://reputation-watch-api.orisbuilds.workers.dev";
+  const SLUG = new URLSearchParams(location.search).get("p") || "";
+  const LIVE = API_BASE !== "";
+
+  // Hide the preview banner once the backend is connected (patients never see it live).
+  if (LIVE){ const b=document.getElementById('demoBanner'); if(b) b.style.display='none'; }
+
+  function go(screen){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('s-'+screen).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function track(what){
+    // 'what' here is the button label; map to a backend action
+    const action = what === 'google' ? 'happy' : what;
+    if (!LIVE){ console.log('[ReputationWatch demo] tracked', action); return; }
+    fetch(API_BASE + '/api/track', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ slug: SLUG, action })
+    }).catch(e=>console.warn('track failed', e));
+  }
+
+  // ---- Load THIS practice's branding from the backend, then count the scan ----
+  function gateMessage(title, sub){
+    document.getElementById('pName').textContent = title;
+    const card = document.querySelector('.card');
+    if (card) card.innerHTML =
+      '<p class="prompt" style="text-align:center">'+title+'</p>'+
+      '<p class="sub" style="text-align:center;margin-bottom:0">'+sub+'</p>';
+  }
+  async function loadPractice(){
+    if (!SLUG){ gateMessage('Missing practice code','Please scan the QR code provided at your dentist’s office.'); return; }
+    try {
+      const r = await fetch(API_BASE + '/api/practice?slug=' + encodeURIComponent(SLUG));
+      if (!r.ok){ gateMessage('We couldn’t find this practice','Please double-check the link, or ask the front desk.'); return; }
+      const p = await r.json();
+      document.title = "How'd we do? — " + p.practice_name;
+      document.getElementById('pName').textContent = p.practice_name;
+      const g = p.google_url || '#';
+      document.getElementById('googleCta').href = g;
+      document.getElementById('googleSoft').href = g;
+      if (p.doctor_name){
+        document.getElementById('doctorNudge').textContent =
+          ' If a particular person made your visit better, feel free to mention ' + p.doctor_name + '.';
+      }
+      track('scan'); // count the scan now that the practice is confirmed
+    } catch(e){
+      gateMessage('Something went wrong','Please try again in a moment.');
+    }
+  }
+  loadPractice();
+
+  async function submitComplaint(e){
+    e.preventDefault();
+    const payload = {
+      slug: SLUG,
+      message: document.getElementById('msg').value,
+      name: document.getElementById('name').value || null,
+      contact: document.getElementById('contact').value || null
+    };
+    if (!LIVE){
+      console.log('[ReputationWatch demo] complaint captured (not sent):', payload);
+      go('done');
+      return;
+    }
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+    try {
+      const r = await fetch(API_BASE + '/api/complaint', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      go('done');
+    } catch (err){
+      console.error('complaint submit failed', err);
+      if (btn){ btn.disabled = false; btn.textContent = 'Send privately to the office'; }
+      alert('Sorry — something went wrong sending your feedback. Please try again, or call the office.');
+    }
+  }
+</script>
+</body>
+</html>
