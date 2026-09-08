@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chairside — Hub</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0f766e">
+<style>
+  :root{
+    --brand:#0f766e; --brand-dark:#0b544e; --brand-tint:#e6f2f0;
+    --ink:#10201e; --ink-2:#4b5b58; --muted:#7d8b88;
+    --surface:#fff; --page:#eef3f2; --hairline:rgba(16,32,30,.10);
+    --shadow:0 1px 2px rgba(16,32,30,.06),0 10px 28px rgba(16,32,30,.06);
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--page);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:720px;margin:0 auto;padding:64px 20px 80px;}
+  .back{display:inline-block;font-size:13px;font-weight:600;color:var(--brand);text-decoration:none;margin-bottom:26px;}
+  .logo{width:60px;height:60px;border-radius:16px;overflow:hidden;box-shadow:0 8px 22px rgba(15,118,110,.28);}
+  .logo svg{display:block;width:100%;height:100%;}
+  h1{font-size:30px;margin:22px 0 6px;letter-spacing:-.4px;}
+  .tag{color:var(--ink-2);font-size:16px;margin:0 0 40px;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow);padding:24px;transition:transform .1s,box-shadow .15s;}
+  a.card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(16,32,30,.08),0 16px 40px rgba(16,32,30,.09);}
+  .card .k{font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--brand);font-weight:700;}
+  .card h2{font-size:18px;margin:8px 0 6px;}
+  .card p{font-size:13.5px;color:var(--ink-2);margin:0;}
+  .card .go{margin-top:16px;font-size:13px;font-weight:600;color:var(--brand);}
+  footer{margin-top:44px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#12a594;box-shadow:0 0 0 3px rgba(18,165,148,.18);}
+  @media(max-width:640px){.cards{grid-template-columns:1fr;} .wrap{padding:48px 20px 64px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Chairside home</a>
+  <div class="logo">
+    <svg viewBox="0 0 104 104" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="csI" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f8378"/><stop offset="1" stop-color="#0b544e"/></linearGradient></defs>
+      <rect width="104" height="104" rx="24" fill="url(#csI)"/>
+      <path d="M32 28 h40 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-14 l-12 12 v-12 h-14 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12 z" fill="#ffffff"/>
+      <path d="M42 50 l8 8 l16 -17" fill="none" stroke="#0f766e" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h1>Chairside — internal hub</h1>
+  <p class="tag">Your working links. Not linked from the public site.</p>
+
+  <div class="cards">
+    <a class="card" href="scan.html">
+      <div class="k">Patient · public</div>
+      <h2>Scan page</h2>
+      <p>What a patient sees after scanning the QR. Happy → Google review; unhappy → private feedback to the office.</p>
+      <div class="go">Open scan page →</div>
+    </a>
+    <a class="card" href="dashboard.html">
+      <div class="k">Dentist · private</div>
+      <h2>Dashboard</h2>
+      <p>Sign-in, setup, a live scannable QR code, feedback stats, and the complaints inbox.</p>
+      <div class="go">Open dashboard →</div>
+    </a>
+  </div>
+
+  <footer><span class="dot"></span> Chairside — trychairside.com</footer>
+</div>
+</body>
+</html>
