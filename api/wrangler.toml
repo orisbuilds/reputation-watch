@@ -2,22 +2,13 @@ name = "reputation-watch-api"
 main = "src/index.js"
 compatibility_date = "2026-08-01"
 
-# --- D1 database binding ---
-# After `npx wrangler d1 create reputation-watch`, paste the returned
-# database_id below (replace PASTE_YOUR_D1_DATABASE_ID_HERE).
+# Keep the variables already set on the live Worker (FROM_EMAIL = alerts@trychairside.com,
+# DASHBOARD_URL). They are deliberately NOT listed here: listing them would overwrite the
+# live values on deploy — the old file had FROM_EMAIL = onboarding@resend.dev, which would
+# have silently broken complaint emails to clinics.
+keep_vars = true
+
 [[d1_databases]]
 binding = "DB"
 database_name = "reputation-watch"
-database_id = "PASTE_YOUR_D1_DATABASE_ID_HERE"
-
-# --- Non-secret vars ---
-# FROM_EMAIL: a Resend-verified sender. Use onboarding@resend.dev while testing,
-#             then switch to something like alerts@yourdomain.com once your domain is verified.
-# DASHBOARD_URL: link shown in the complaint email (optional).
-[vars]
-FROM_EMAIL = "onboarding@resend.dev"
-DASHBOARD_URL = "https://orisbuilds.github.io/reputation-watch/dashboard.html"
-
-# --- Secrets (DO NOT put here; set via `wrangler secret put`) ---
-#   RESEND_API_KEY   -> your Resend API key
-#   ADMIN_TOKEN      -> any long random string; protects dentist provisioning
+database_id = "f16dec53-7d76-4967-ae59-8404a7befd71"

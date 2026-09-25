@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS dentists (
   email         TEXT NOT NULL,             -- where complaint alerts are sent
   google_url    TEXT,                      -- their Google review link
   access_token  TEXT NOT NULL,             -- dashboard login secret (issued at provisioning)
+  active        INTEGER NOT NULL DEFAULT 1, -- 1 = live, 0 = paused (blocks login, scan page, complaints)
+  market        TEXT NOT NULL DEFAULT 'us',       -- us | ge
+  plan          TEXT NOT NULL DEFAULT 'standard', -- standard | pro
   created_at    TEXT DEFAULT (datetime('now'))
 );
 
