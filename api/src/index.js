@@ -17,8 +17,14 @@
  *   GET  /api/stats?slug=...   (Bearer token) -> {scans, happy, unhappy, complaints}
  *   GET  /api/complaints?slug=...(Bearer)     -> [ {message,name,contact,created_at}, ... ]
  *   PUT  /api/dentist    {doctor_name?, email?, google_url?} (Bearer) -> update own profile
- *   POST /api/dentist    {slug, practice_name, doctor_name, email, google_url}
+ *   POST /api/dentist    {slug, practice_name, doctor_name, email, google_url, market?, plan?}
  *                                             (Bearer ADMIN_TOKEN) -> create dentist, returns access token
+ *   POST /api/admin/plan {slug, plan?, market?} (Bearer ADMIN_TOKEN) -> change a clinic's plan/market
+ *
+ * Markets & plans (drive which languages the patient scan page offers):
+ *   market "us" (default)          -> English only
+ *   market "ge", plan "standard"   -> Georgian + English
+ *   market "ge", plan "pro"        -> Georgian + English + Russian + Hebrew
  *
  * All responses are JSON. CORS is open (*) so the static GitHub Pages site can call it.
  */
@@ -53,6 +59,12 @@ function slugify(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+const MARKETS = ["us", "ge"];
+const PLANS = ["standard", "pro"];
+// Read plan/market from a row, falling back safely if the columns don't exist yet.
+function planOf(row) { return PLANS.includes(row && row.plan) ? row.plan : "standard"; }
+function marketOf(row) { return MARKETS.includes(row && row.market) ? row.market : "us"; }
+
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"]/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
@@ -67,6 +79,7 @@ async function authDentist(env, request, slug) {
   const row = await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
   if (!row) return { error: json({ error: "unknown practice" }, 404) };
   if (row.access_token !== token) return { error: json({ error: "invalid token" }, 401) };
+  if (row.active === 0) return { error: json({ error: "This account is paused. Please contact Chairside." }, 403) };
   return { dentist: row };
 }
 
@@ -140,6 +153,7 @@ export default {
         if (!slug || !message) return json({ error: "slug and message required" }, 400);
         const dentist = await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
         if (!dentist) return json({ error: "unknown practice" }, 404);
+        if (dentist.active === 0) return json({ error: "paused" }, 403); // paused clinic → don't accept feedback
         const name = (body.name || "").toString().slice(0, 120) || null;
         const contact = (body.contact || "").toString().slice(0, 200) || null;
         await env.DB.prepare(
@@ -150,15 +164,36 @@ export default {
         return json({ ok: true, emailed: mail.ok === true, mail });
       }
 
+      // ---- public: a practice's public info, for rendering the scan page ----
+      if (path === "/api/practice" && request.method === "GET") {
+        const slug = slugify(url.searchParams.get("slug"));
+        if (!slug) return json({ error: "missing slug" }, 400);
+        // SELECT * so this keeps working even before the plan/market columns are added
+        const row = await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
+        if (!row) return json({ error: "unknown practice" }, 404);
+        if (row.active === 0) return json({ error: "paused" }, 404); // paused clinic → scan page shows the not-found gate
+        // public-safe fields only — never email or access_token
+        return json({
+          slug: row.slug,
+          practice_name: row.practice_name,
+          doctor_name: row.doctor_name,
+          google_url: row.google_url,
+          market: marketOf(row),
+          plan: planOf(row),
+        });
+      }
+
       // ---- login: email + access token ----
       if (path === "/api/login" && request.method === "POST") {
         const email = String(body.email || "").trim().toLowerCase();
         const token = String(body.token || "").trim();
         if (!email || !token) return json({ error: "email and access token required" }, 401);
         const row = await env.DB.prepare(
-          "SELECT slug, practice_name, doctor_name, email, google_url FROM dentists WHERE lower(email) = ? AND access_token = ?"
+          "SELECT slug, practice_name, doctor_name, email, google_url, active FROM dentists WHERE lower(email) = ? AND access_token = ?"
         ).bind(email, token).first();
         if (!row) return json({ error: "invalid email or access token" }, 401);
+        if (row.active === 0) return json({ error: "This account is paused. Please contact Chairside." }, 403);
+        delete row.active;
         return json({ ok: true, dentist: row });
       }
 
@@ -179,6 +214,36 @@ export default {
           unhappy: counts.unhappy,
           complaints: comp ? comp.n : 0,
         });
+      }
+
+      // ---- timeseries (auth): daily happy/unhappy for the trend chart ----
+      if (path === "/api/timeseries" && request.method === "GET") {
+        const slug = slugify(url.searchParams.get("slug"));
+        const a = await authDentist(env, request, slug);
+        if (a.error) return a.error;
+        let days = parseInt(url.searchParams.get("days") || "30", 10);
+        if (!Number.isFinite(days) || days < 7) days = 30;
+        if (days > 180) days = 180;
+        const rows = await env.DB.prepare(
+          "SELECT substr(created_at,1,10) AS day, action, COUNT(*) AS n " +
+          "FROM events WHERE slug = ? AND action IN ('happy','unhappy') " +
+          "AND created_at >= datetime('now', ?) GROUP BY day, action"
+        ).bind(slug, `-${days} days`).all();
+        // build a zero-filled series so the chart has a continuous line
+        const byDay = {};
+        for (const r of rows.results || []) {
+          byDay[r.day] = byDay[r.day] || { happy: 0, unhappy: 0 };
+          byDay[r.day][r.action] = r.n;
+        }
+        const series = [];
+        const today = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+          const d = new Date(today.getTime() - i * 86400000);
+          const key = d.toISOString().slice(0, 10);
+          const v = byDay[key] || { happy: 0, unhappy: 0 };
+          series.push({ day: key, happy: v.happy || 0, unhappy: v.unhappy || 0 });
+        }
+        return json({ days, series });
       }
 
       // ---- complaints list (auth) ----
@@ -217,11 +282,30 @@ export default {
         if (!slug) return json({ error: "could not derive slug" }, 400);
         const exists = await env.DB.prepare("SELECT slug FROM dentists WHERE slug = ?").bind(slug).first();
         if (exists) return json({ error: `slug '${slug}' already exists` }, 409);
+        const market = String(body.market || "us").toLowerCase();
+        const plan = String(body.plan || "standard").toLowerCase();
+        if (!MARKETS.includes(market)) return json({ error: `market must be one of: ${MARKETS.join(", ")}` }, 400);
+        if (!PLANS.includes(plan)) return json({ error: `plan must be one of: ${PLANS.join(", ")}` }, 400);
         const token = newToken();
         await env.DB.prepare(
-          "INSERT INTO dentists (slug, practice_name, doctor_name, email, google_url, access_token) VALUES (?,?,?,?,?,?)"
-        ).bind(slug, practice, body.doctor_name || null, email, body.google_url || null, token).run();
-        return json({ ok: true, slug, access_token: token, scan_url: `/scan.html?p=${slug}` });
+          "INSERT INTO dentists (slug, practice_name, doctor_name, email, google_url, access_token, market, plan) VALUES (?,?,?,?,?,?,?,?)"
+        ).bind(slug, practice, body.doctor_name || null, email, body.google_url || null, token, market, plan).run();
+        return json({ ok: true, slug, market, plan, access_token: token, scan_url: `/scan.html?p=${slug}` });
+      }
+
+      // ---- change a clinic's plan / market (admin only) — e.g. upgrade to Pro after payment ----
+      if (path === "/api/admin/plan" && request.method === "POST") {
+        if (!env.ADMIN_TOKEN || bearer(request) !== env.ADMIN_TOKEN)
+          return json({ error: "admin token required" }, 401);
+        const slug = slugify(body.slug);
+        const row = slug && await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
+        if (!row) return json({ error: "unknown practice" }, 404);
+        const plan = body.plan != null ? String(body.plan).toLowerCase() : planOf(row);
+        const market = body.market != null ? String(body.market).toLowerCase() : marketOf(row);
+        if (!PLANS.includes(plan)) return json({ error: `plan must be one of: ${PLANS.join(", ")}` }, 400);
+        if (!MARKETS.includes(market)) return json({ error: `market must be one of: ${MARKETS.join(", ")}` }, 400);
+        await env.DB.prepare("UPDATE dentists SET plan = ?, market = ? WHERE slug = ?").bind(plan, market, slug).run();
+        return json({ ok: true, slug, plan, market });
       }
 
       return json({ error: "not found", path }, 404);
