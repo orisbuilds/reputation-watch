@@ -97,6 +97,8 @@
   .softlink{display:block; text-align:center; margin-top:20px; font-size:12.5px; color:var(--muted);}
   .softlink a{color:var(--muted); text-decoration:underline;}
   .back{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:18px;display:block;width:100%;}
+  .privnote{display:block; text-align:center; margin-top:14px; font-size:11.5px; color:var(--muted); line-height:1.45;}
+  .privnote a{color:var(--muted); text-decoration:underline;}
   footer.legal{margin-top:22px; text-align:center; font-size:11.5px; color:var(--muted);}
   /* language switcher (only shown when the clinic's plan offers >1 language) */
   .langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:14px;}
@@ -163,6 +165,7 @@
         <button class="cta" type="submit" style="margin-top:20px;" data-t="send">Send privately to the office</button>
       </form>
       <span class="softlink"><span data-t="public_q">Prefer to post publicly instead?</span> <a id="googleSoft" href="#" target="_blank" rel="noopener" data-t="public_a">Leave a Google review</a>.</span>
+      <span class="privnote"><span data-t="priv_note">Your note goes only to this clinic, and your details are used only to reply to you.</span> <a href="/privacy.html" target="_blank" rel="noopener" data-t="priv_link">Privacy policy</a></span>
       <button class="back" onclick="go('ask')" data-t="back">← Back</button>
     </div>
 
@@ -217,7 +220,7 @@
       l_msg:"What went wrong?", ph_msg:"Tell us in your own words…", l_name:"Your name", optional:"(optional)",
       ph_name:"So we can follow up with you", l_contact:"Phone or email", ph_contact:"Best way to reach you",
       send:"Send privately to the office", sending:"Sending…",
-      public_q:"Prefer to post publicly instead?", public_a:"Leave a Google review",
+      public_q:"Prefer to post publicly instead?", public_a:"Leave a Google review", priv_note:"Your note goes only to this clinic, and your details are used only to reply to you.", priv_link:"Privacy policy",
       done_title:"Thank you.", done_sub:"The office will personally look into this. If you left your contact details, someone will reach out.",
       legal:"We ask every patient for honest feedback.", powered:"Powered by Chairside",
       g_missing_t:"Missing practice code", g_missing_s:"Please scan the QR code provided at your dentist’s office.",
@@ -236,7 +239,7 @@
       l_msg:"რა არ მოგეწონათ?", ph_msg:"მოგვწერეთ დეტალურად…", l_name:"თქვენი სახელი", optional:"(არასავალდებულო)",
       ph_name:"რათა დაგიკავშირდეთ", l_contact:"ტელეფონი ან ელფოსტა", ph_contact:"როგორ დაგიკავშირდეთ?",
       send:"კონფიდენციალურად გაგზავნა", sending:"იგზავნება…",
-      public_q:"გირჩევნიათ საჯაროდ დაწეროთ?", public_a:"დატოვეთ შეფასება Google-ზე",
+      public_q:"გირჩევნიათ საჯაროდ დაწეროთ?", public_a:"დატოვეთ შეფასება Google-ზე", priv_note:"თქვენი შეტყობინება მხოლოდ ამ კლინიკას მიუვა, თქვენს მონაცემებს კი მხოლოდ თქვენთან დასაკავშირებლად გამოვიყენებთ.", priv_link:"კონფიდენციალურობის პოლიტიკა",
       done_title:"გმადლობთ.", done_sub:"კლინიკა პირადად განიხილავს თქვენს შეტყობინებას. თუ საკონტაქტო მონაცემები დატოვეთ, დაგიკავშირდებიან.",
       legal:"ყველა პაციენტს ვთხოვთ გულწრფელ შეფასებას.", powered:"უზრუნველყოფს Chairside",
       g_missing_t:"კლინიკის კოდი მითითებული არ არის", g_missing_s:"გთხოვთ, დაასკანეროთ კლინიკაში განთავსებული QR კოდი.",
@@ -255,7 +258,7 @@
       l_msg:"Что пошло не так?", ph_msg:"Расскажите своими словами…", l_name:"Ваше имя", optional:"(необязательно)",
       ph_name:"Чтобы мы могли связаться с вами", l_contact:"Телефон или email", ph_contact:"Как с вами лучше связаться",
       send:"Отправить конфиденциально", sending:"Отправка…",
-      public_q:"Хотите написать публично?", public_a:"Оставить отзыв в Google",
+      public_q:"Хотите написать публично?", public_a:"Оставить отзыв в Google", priv_note:"Ваше сообщение получит только эта клиника, а ваши данные будут использованы только для ответа вам.", priv_link:"Политика конфиденциальности",
       done_title:"Спасибо.", done_sub:"Клиника лично рассмотрит ваше сообщение. Если вы оставили контакты, с вами свяжутся.",
       legal:"Мы просим каждого пациента оставить честный отзыв.", powered:"Сервис Chairside",
       g_missing_t:"Нет кода клиники", g_missing_s:"Пожалуйста, отсканируйте QR-код в вашей клинике.",
@@ -274,7 +277,7 @@
       l_msg:"מה השתבש?", ph_msg:"ספרו לנו במילים שלכם…", l_name:"השם שלכם", optional:"(לא חובה)",
       ph_name:"כדי שנוכל לחזור אליכם", l_contact:"טלפון או אימייל", ph_contact:"הדרך הטובה ביותר ליצור איתכם קשר",
       send:"שליחה פרטית למרפאה", sending:"בשליחה…",
-      public_q:"מעדיפים לפרסם באופן פומבי?", public_a:"השאירו ביקורת בגוגל",
+      public_q:"מעדיפים לפרסם באופן פומבי?", public_a:"השאירו ביקורת בגוגל", priv_note:"ההודעה שלכם תגיע רק למרפאה הזו, והפרטים שלכם ישמשו רק כדי לחזור אליכם.", priv_link:"מדיניות פרטיות",
       done_title:"תודה.", done_sub:"המרפאה תבדוק את הפנייה באופן אישי. אם השארתם פרטי קשר, יחזרו אליכם.",
       legal:"אנחנו מבקשים מכל מטופל לשתף משוב אמיתי.", powered:"מופעל על ידי Chairside",
       g_missing_t:"חסר קוד מרפאה", g_missing_s:"אנא סרקו את קוד ה-QR שבמרפאה.",
