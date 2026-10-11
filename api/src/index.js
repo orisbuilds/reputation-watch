@@ -21,6 +21,14 @@
  *                                             (Bearer ADMIN_TOKEN) -> create dentist, returns access token
  *   POST /api/admin/plan {slug, plan?, market?} (Bearer ADMIN_TOKEN) -> change a clinic's plan/market
  *
+ * Instant alerts on Telegram / WhatsApp (see alerts.js; all admin routes need Bearer ADMIN_TOKEN):
+ *   POST /api/admin/telegram-link   {slug, label?}            -> one-time t.me link the clinic taps to connect
+ *   POST /api/admin/alert-target    {slug, channel:"whatsapp", target:"+995…", label?} -> add WhatsApp recipient
+ *   GET  /api/admin/alert-targets?slug=…                      -> list recipients
+ *   POST /api/admin/alert-target/remove {id}                  -> switch a recipient off
+ *   POST /api/admin/alert-test      {slug}                    -> send a test alert to every recipient
+ *   POST /api/telegram/webhook      (Telegram only, checked with a secret header)
+ *
  * Markets & plans (drive which languages the patient scan page offers):
  *   market "us" (default)          -> English only
  *   market "ge", plan "standard"   -> Georgian + English
@@ -28,6 +36,11 @@
  *
  * All responses are JSON. CORS is open (*) so the static GitHub Pages site can call it.
  */
+
+import {
+  fanOutAlerts, handleTelegramUpdate, ensureTelegramWebhook, telegramWebhookSecret,
+  countTargets, PLAN_TARGET_LIMIT,
+} from "./alerts.js";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -122,7 +135,7 @@ async function sendComplaintEmail(env, dentist, c) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     const url = new URL(request.url);
@@ -160,8 +173,13 @@ export default {
           "INSERT INTO complaints (slug, message, name, contact) VALUES (?, ?, ?, ?)"
         ).bind(slug, message.slice(0, 4000), name, contact).run();
         await env.DB.prepare("INSERT INTO events (slug, action) VALUES (?, 'unhappy')").bind(slug).run();
-        const mail = await sendComplaintEmail(env, dentist, { message, name, contact });
-        return json({ ok: true, emailed: mail.ok === true, mail });
+        const note = { message, name, contact };
+        const mail = await sendComplaintEmail(env, dentist, note);
+        if (mail.error) console.error("email alert failed", slug, mail.error);
+        // Telegram / WhatsApp go out in the background, so the patient never waits on them.
+        const fan = fanOutAlerts(env, dentist, note, marketOf(dentist));
+        if (ctx && ctx.waitUntil) ctx.waitUntil(fan); else await fan;
+        return json({ ok: true, emailed: mail.ok === true });
       }
 
       // ---- public: a practice's public info, for rendering the scan page ----
@@ -291,6 +309,80 @@ export default {
           "INSERT INTO dentists (slug, practice_name, doctor_name, email, google_url, access_token, market, plan) VALUES (?,?,?,?,?,?,?,?)"
         ).bind(slug, practice, body.doctor_name || null, email, body.google_url || null, token, market, plan).run();
         return json({ ok: true, slug, market, plan, access_token: token, scan_url: `/scan.html?p=${slug}` });
+      }
+
+      // ---- Telegram webhook (called by Telegram, verified by secret header) ----
+      if (path === "/api/telegram/webhook" && request.method === "POST") {
+        if (!env.TELEGRAM_BOT_TOKEN) return json({ ok: true });
+        const got = request.headers.get("X-Telegram-Bot-Api-Secret-Token") || "";
+        if (got !== await telegramWebhookSecret(env)) return json({ error: "forbidden" }, 403);
+        try { await handleTelegramUpdate(env, body); } catch (e) { console.error("telegram update failed", String(e && e.message || e)); }
+        return json({ ok: true }); // always 200 so Telegram doesn't retry forever
+      }
+
+      // ---- alert recipients (admin only) ----
+      if (path.startsWith("/api/admin/alert") || path === "/api/admin/telegram-link") {
+        if (!env.ADMIN_TOKEN || bearer(request) !== env.ADMIN_TOKEN)
+          return json({ error: "admin token required" }, 401);
+
+        if (path === "/api/admin/telegram-link" && request.method === "POST") {
+          if (!env.TELEGRAM_BOT_TOKEN) return json({ error: "TELEGRAM_BOT_TOKEN is not set" }, 400);
+          const slug = slugify(body.slug);
+          const row = slug && await env.DB.prepare("SELECT slug FROM dentists WHERE slug = ?").bind(slug).first();
+          if (!row) return json({ error: "unknown practice" }, 404);
+          const username = await ensureTelegramWebhook(env, url.origin);
+          const code = newToken(18);
+          const label = body.label ? String(body.label).slice(0, 80) : null;
+          await env.DB.prepare(
+            "INSERT INTO link_codes (code, slug, label, expires_at) VALUES (?, ?, ?, datetime('now', '+7 days'))"
+          ).bind(code, slug, label).run();
+          return json({ ok: true, link: `https://t.me/${username}?start=${code}`, expires_in_days: 7 });
+        }
+
+        if (path === "/api/admin/alert-target" && request.method === "POST") {
+          const slug = slugify(body.slug);
+          const row = slug && await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
+          if (!row) return json({ error: "unknown practice" }, 404);
+          if (String(body.channel) !== "whatsapp") return json({ error: "channel must be 'whatsapp' (Telegram connects through /api/admin/telegram-link)" }, 400);
+          const target = "+" + String(body.target || "").replace(/[^\d]/g, "");
+          if (!/^\+\d{8,15}$/.test(target)) return json({ error: "target must be a phone number in international format, e.g. +995555123456" }, 400);
+          const existing = await env.DB.prepare(
+            "SELECT id, active FROM alert_targets WHERE slug = ? AND channel = 'whatsapp' AND target = ?"
+          ).bind(slug, target).first();
+          if (!(existing && existing.active === 1) && (await countTargets(env, slug)) >= PLAN_TARGET_LIMIT[planOf(row)])
+            return json({ error: `plan '${planOf(row)}' allows ${PLAN_TARGET_LIMIT[planOf(row)]} messenger recipient(s)` }, 409);
+          const label = body.label ? String(body.label).slice(0, 80) : null;
+          if (existing) await env.DB.prepare("UPDATE alert_targets SET active = 1, label = COALESCE(?, label) WHERE id = ?").bind(label, existing.id).run();
+          else await env.DB.prepare("INSERT INTO alert_targets (slug, channel, target, label) VALUES (?, 'whatsapp', ?, ?)").bind(slug, target, label).run();
+          return json({ ok: true, slug, channel: "whatsapp", target });
+        }
+
+        if (path === "/api/admin/alert-targets" && request.method === "GET") {
+          const slug = slugify(url.searchParams.get("slug"));
+          const rows = await env.DB.prepare(
+            "SELECT id, channel, target, label, active, created_at FROM alert_targets WHERE slug = ? ORDER BY id"
+          ).bind(slug).all();
+          return json({ slug, targets: rows.results || [] });
+        }
+
+        if (path === "/api/admin/alert-target/remove" && request.method === "POST") {
+          const id = parseInt(body.id, 10);
+          const r = await env.DB.prepare("UPDATE alert_targets SET active = 0 WHERE id = ?").bind(id).run();
+          return json({ ok: true, changed: (r.meta && r.meta.changes) || 0 });
+        }
+
+        if (path === "/api/admin/alert-test" && request.method === "POST") {
+          const slug = slugify(body.slug);
+          const row = slug && await env.DB.prepare("SELECT * FROM dentists WHERE slug = ?").bind(slug).first();
+          if (!row) return json({ error: "unknown practice" }, 404);
+          const results = await fanOutAlerts(env, row, {
+            message: marketOf(row) === "ge"
+              ? "ეს სატესტო შეტყობინებაა — Chairside-ის შეტყობინებები მუშაობს. / This is a test — Chairside alerts are working."
+              : "This is a test — Chairside alerts are working.",
+            name: "Chairside", contact: null,
+          }, marketOf(row));
+          return json({ ok: true, results });
+        }
       }
 
       // ---- change a clinic's plan / market (admin only) — e.g. upgrade to Pro after payment ----
