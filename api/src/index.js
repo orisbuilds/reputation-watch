@@ -29,7 +29,7 @@
  *   POST /api/admin/alert-test      {slug}                    -> send a test alert to every recipient
  *   GET  /api/admin/clinics                                   -> every clinic, newest first, with scans (30d), notes, messengers
  *   POST /api/admin/clinic/status   {slug, active:true|false} -> resume / pause a clinic
- *   POST /api/admin/clinic/delete   {slug, confirm_slug}      -> permanently remove a PAUSED clinic + all its data
+ *   POST /api/admin/clinic/delete   {slug, confirm_slug}      -> permanently remove a clinic + all its data
  *   POST /api/telegram/webhook      (Telegram only, checked with a secret header)
  *
  * Markets & plans (drive which languages the patient scan page offers):
@@ -350,14 +350,13 @@ export default {
           return json({ ok: true, slug, active });
         }
 
-        // ---- permanently remove a clinic and all its data (must be paused first, short code typed to confirm) ----
+        // ---- permanently remove a clinic and all its data (short code typed + admin password re-entered to confirm) ----
         if (path === "/api/admin/clinic/delete" && request.method === "POST") {
           const slug = slugify(body.slug);
           const row = slug && await env.DB.prepare("SELECT slug, active FROM dentists WHERE slug = ?").bind(slug).first();
           if (!row) return json({ error: "unknown practice" }, 404);
           if (String(body.confirm_slug || "").trim().toLowerCase() !== slug)
             return json({ error: "the short code you typed doesn't match this clinic" }, 400);
-          if (row.active !== 0) return json({ error: "pause the clinic first, then remove it" }, 409);
           const res = await env.DB.batch([
             env.DB.prepare("DELETE FROM events WHERE slug = ?").bind(slug),
             env.DB.prepare("DELETE FROM complaints WHERE slug = ?").bind(slug),
