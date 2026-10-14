@@ -30,6 +30,10 @@
   .mini.pause{background:var(--bad)} .mini.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
   .tablewrap{overflow-x:auto} .summary{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--muted)}
   .summary b{color:var(--ink)}
+  .mini.remove{background:#fff;color:var(--bad);border:1.5px solid var(--bad)}
+  .danger{border:2px solid var(--bad);background:#fffafa}
+  .danger h2{color:var(--bad)} .danger code{background:#fee4e2;padding:2px 6px;border-radius:6px;font-weight:700}
+  button.red{background:var(--bad)} button:disabled{opacity:.4;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -47,11 +51,23 @@
   <div id="tools" class="locked">
   <section class="card">
     <h2>Your clinics</h2>
-    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted.</div>
+    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted. To delete a clinic for good, pause it first; a <b>Remove…</b> button then appears.</div>
     <input id="c_filter" placeholder="Search by name or short code" style="margin-top:12px">
     <div class="summary" id="c_summary"></div>
     <div class="tablewrap" id="c_list"></div>
     <button class="ghost" id="c_refresh">Refresh list</button>
+  </section>
+
+  <section class="card danger" id="rm_box" hidden>
+    <h2>Remove a clinic permanently</h2>
+    <p style="margin:0">You are about to remove <b id="rm_name"></b> (short code <code id="rm_slug"></code>).</p>
+    <p class="muted" style="margin:6px 0 0">This deletes the clinic and everything linked to it — its scan page, all scans and private notes, and its Telegram/WhatsApp recipients. It can't be undone from this page.</p>
+    <label for="rm_confirm">1 · Type the short code <code id="rm_slug2"></code> to confirm this is the right clinic</label>
+    <input id="rm_confirm" autocomplete="off" placeholder="type the short code exactly">
+    <label for="rm_tok">2 · Re-enter your admin password</label>
+    <input id="rm_tok" type="password" autocomplete="off" placeholder="admin password">
+    <button class="red" id="rm_go" disabled>Remove permanently</button>
+    <button class="ghost" id="rm_cancel">Cancel</button>
   </section>
 
   <section class="card">
@@ -135,6 +151,7 @@
             "<button class='mini ghost' data-act='use' data-slug='" + esc(c.slug) + "'>Alerts</button>" +
             "<button class='mini ghost' data-act='copy' data-slug='" + esc(c.slug) + "'>Copy QR link</button>" +
             "<button class='mini ghost' data-act='key' data-slug='" + esc(c.slug) + "'>Dashboard key</button>" +
+            (c.active ? "" : "<button class='mini remove' data-act='remove' data-slug='" + esc(c.slug) + "'>Remove…</button>") +
           "</td></tr>";
       }).join("") + "</table>";
   }
@@ -165,7 +182,32 @@
       try { await navigator.clipboard.writeText(link); show("Copied: " + link); } catch(err) { show(link); }
       return;
     }
+    if (act === "remove") {
+      RM = slug;
+      $("rm_name").textContent = c.practice_name || slug;
+      $("rm_slug").textContent = slug; $("rm_slug2").textContent = slug;
+      $("rm_confirm").value = ""; $("rm_tok").value = ""; $("rm_go").disabled = true;
+      $("rm_box").hidden = false; $("rm_box").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (act === "key") { show("Dashboard login for " + (c.practice_name || slug) + "\nEmail: " + (c.email || "") + "\nKey: " + (c.access_token || "")); return; }
+  };
+
+  var RM = "";
+  function rmCheck(){ $("rm_go").disabled = !($("rm_confirm").value.trim().toLowerCase() === RM && $("rm_tok").value.trim()); }
+  $("rm_confirm").oninput = rmCheck; $("rm_tok").oninput = rmCheck;
+  $("rm_cancel").onclick = function(){ RM = ""; $("rm_tok").value = ""; $("rm_box").hidden = true; };
+  $("rm_go").onclick = async function(){
+    var again = $("rm_tok").value.trim(); $("rm_tok").value = "";
+    var r = await fetch(API + "/api/admin/clinic/delete", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + again, "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: RM, confirm_slug: $("rm_confirm").value.trim() })
+    });
+    var d; try { d = await r.json(); } catch(e) { d = { error: "HTTP " + r.status }; }
+    if (r.status === 401) d.error = "That admin password is wrong — nothing was removed.";
+    show(d);
+    if (d.ok) { RM = ""; $("rm_box").hidden = true; loadClinics(); } else { rmCheck(); }
   };
 
   $("unlock").onclick = async function(){
