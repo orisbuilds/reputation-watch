@@ -34,6 +34,18 @@
   .danger{border:2px solid var(--bad);background:#fffafa}
   .danger h2{color:var(--bad)} .danger code{background:#fee4e2;padding:2px 6px;border-radius:6px;font-weight:700}
   button.red{background:var(--bad)} button:disabled{opacity:.4;cursor:not-allowed}
+  .tabs{display:flex;gap:6px;margin-top:18px;border-bottom:2px solid var(--line)}
+  .tab{margin:0 0 -2px;background:none;color:var(--muted);border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 14px;font-size:15px}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .tab .count{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:#e8f4f2;color:var(--brand);font-size:12px}
+  .slots{margin-top:6px}
+  .slot{display:grid;grid-template-columns:28px 1fr 130px 1fr auto;gap:8px;align-items:end;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .slot .n{font-weight:700;color:var(--muted);padding-bottom:10px}
+  .slot button{margin:0;white-space:nowrap}
+  .slot .res{grid-column:2 / -1;font-size:13px}
+  .slot .res .link{margin-top:4px}
+  @media (max-width:640px){.slot{grid-template-columns:24px 1fr}.slot>*:not(.n){grid-column:2}}
+  .planpill{display:inline-block;padding:2px 10px;border-radius:999px;background:#e8f4f2;color:var(--brand);font-weight:700;font-size:12px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -49,9 +61,15 @@
   </section>
 
   <div id="tools" class="locked">
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="onboard" role="tab">Onboard a clinic</button>
+    <button class="tab" data-tab="clinics" role="tab">Your clinics<span class="count" id="tab_count">0</span></button>
+  </div>
+
+  <div id="pane_clinics" hidden>
   <section class="card">
     <h2>Your clinics</h2>
-    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted. <b>Remove…</b> deletes a clinic for good, and asks you to type its short code and your admin password again first.</div>
+    <div class="muted">Every clinic you add on the <b>Onboard a clinic</b> tab appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted. <b>Remove…</b> deletes a clinic for good, and asks you to type its short code and your admin password again first.</div>
     <input id="c_filter" placeholder="Search by name or short code" style="margin-top:12px">
     <div class="summary" id="c_summary"></div>
     <div class="tablewrap" id="c_list"></div>
@@ -69,6 +87,9 @@
     <button class="red" id="rm_go" disabled>Remove permanently</button>
     <button class="ghost" id="rm_cancel">Cancel</button>
   </section>
+  </div>
+
+  <div id="pane_onboard">
 
   <section class="card">
     <h2>2 · Add a clinic</h2>
@@ -79,30 +100,23 @@
       <div><label>Alert email</label><input id="c_email" type="email"></div>
       <div><label>Google review link</label><input id="c_google" placeholder="https://g.page/r/…/review"></div>
       <div><label>Market</label><select id="c_market"><option value="ge">Georgia (ge)</option><option value="us">US (us)</option></select></div>
-      <div><label>Plan</label><select id="c_plan"><option value="standard">Standard</option><option value="pro">Pro (also launch offer)</option></select></div>
+      <div><label>Plan</label><select id="c_plan"><option value="standard">Standard — 1 Telegram/WhatsApp recipient</option><option value="pro">Pro (also launch offer) — up to 5 recipients</option></select></div>
     </div>
     <button id="add_clinic">Add clinic</button>
     <div class="muted" style="margin-top:8px">The result shows the clinic's dashboard password (access_token) and scan link — copy them somewhere safe.</div>
   </section>
 
   <section class="card">
-    <h2>3 · Alerts for a clinic</h2>
+    <h2>3 · Who gets the alerts <span class="planpill" id="a_plan">Standard · 1 recipient</span></h2>
+    <div class="muted">Email always goes to the clinic's alert email. On top of that, each row below is one person who also gets every private note on Telegram or WhatsApp. Standard has 1 row, Pro has 5. Telegram doesn't use a phone number: you get a one-time link to send that person, and they tap it to connect.</div>
     <label>Clinic short code</label><input id="a_slug" placeholder="smile-dental">
-    <div class="row">
-      <div>
-        <label>Telegram — who is connecting? (optional)</label><input id="a_label" placeholder="Dr. Nino">
-        <button id="tg_link">Create Telegram link</button>
-      </div>
-      <div>
-        <label>WhatsApp number (international format)</label><input id="wa_num" placeholder="+995 555 12 34 56">
-        <button id="wa_add">Add WhatsApp</button>
-      </div>
-    </div>
+    <div class="slots" id="slots"></div>
     <div id="tg_out"></div>
-    <button class="ghost" id="list">Show recipients</button>
+    <button class="ghost" id="list">Show connected recipients</button>
     <button class="ghost" id="test">Send test alert</button>
     <div id="list_out"></div>
   </section>
+  </div>
 
   <section class="card">
     <h2>Result</h2>
@@ -136,7 +150,7 @@
     var rows = CLINICS.filter(function(c){ return !q || (c.practice_name||"").toLowerCase().indexOf(q) >= 0 || c.slug.indexOf(q) >= 0; });
     var live = CLINICS.filter(function(c){ return c.active; }).length;
     $("c_summary").innerHTML = "<span><b>" + CLINICS.length + "</b> clinics</span><span><b>" + live + "</b> live</span><span><b>" + (CLINICS.length - live) + "</b> paused</span>";
-    if (!rows.length) { $("c_list").innerHTML = '<div class="muted" style="margin-top:10px">' + (CLINICS.length ? "No clinic matches that search." : "No clinics yet — add your first one below.") + "</div>"; return; }
+    if (!rows.length) { $("c_list").innerHTML = '<div class="muted" style="margin-top:10px">' + (CLINICS.length ? "No clinic matches that search." : "No clinics yet — add your first one on the Onboard a clinic tab.") + "</div>"; return; }
     $("c_list").innerHTML = '<table class="clin"><tr><th>Clinic</th><th>Plan</th><th>Status</th><th>Scans (30d)</th><th>Notes</th><th>Alerts</th><th>Added</th><th></th></tr>' +
       rows.map(function(c){
         return "<tr><td><div class='name'>" + esc(c.practice_name) + "</div><small>" + esc(c.slug) + (c.doctor_name ? " · " + esc(c.doctor_name) : "") + "</small></td>" +
@@ -159,7 +173,8 @@
     var d = await call("GET", "/api/admin/clinics");
     if (d.error) return show(d);
     CLINICS = d.clinics || [];
-    renderClinics();
+    $("tab_count").textContent = CLINICS.length;
+    renderClinics(); renderSlots();
   }
   $("c_filter").oninput = renderClinics;
   $("c_refresh").onclick = loadClinics;
@@ -176,7 +191,11 @@
       show(await call("POST", "/api/admin/clinic/status", { slug: slug, active: !pause }));
       return loadClinics();
     }
-    if (act === "use") { $("a_slug").value = slug; $("a_slug").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+    if (act === "use") {
+      showTab("onboard"); $("a_slug").value = slug;
+      document.querySelectorAll("#slots .res").forEach(function(r){ r.innerHTML = ""; });
+      renderSlots(); $("a_slug").scrollIntoView({ behavior: "smooth", block: "center" }); return;
+    }
     if (act === "copy") {
       var link = "https://trychairside.com/scan.html?p=" + slug;
       try { await navigator.clipboard.writeText(link); show("Copied: " + link); } catch(err) { show(link); }
@@ -227,19 +246,75 @@
       doctor_name: $("c_doc").value.trim() || undefined, email: $("c_email").value.trim(),
       google_url: $("c_google").value.trim() || undefined, market: $("c_market").value, plan: $("c_plan").value
     });
-    if (d.slug) { $("a_slug").value = d.slug; d.full_scan_link = "https://trychairside.com" + d.scan_url; loadClinics(); }
+    if (d.slug) { document.querySelectorAll("#slots .res").forEach(function(r){ r.innerHTML = ""; }); $("a_slug").value = d.slug; d.full_scan_link = "https://trychairside.com" + d.scan_url; loadClinics(); }
     show(d);
   };
 
-  $("tg_link").onclick = async function(){
-    var d = await call("POST", "/api/admin/telegram-link", { slug: slug(), label: $("a_label").value.trim() || undefined });
-    $("tg_out").innerHTML = d.link ? '<a class="link" href="' + esc(d.link) + '" target="_blank" rel="noopener">' + esc(d.link) + '</a><div class="muted">Send this to the clinic. It works once and expires in 7 days.</div>' : "";
+  // ---- recipient rows: 1 for Standard, 5 for Pro ----
+  var LIMIT = { standard: 1, pro: 5 };
+  function currentPlan(){
+    var sl = slug().toLowerCase();
+    var c = CLINICS.filter(function(x){ return x.slug === sl; })[0];
+    return c ? (c.plan === "pro" ? "pro" : "standard") : $("c_plan").value;
+  }
+  function renderSlots(){
+    var plan = currentPlan(), n = LIMIT[plan], box = $("slots");
+    $("a_plan").textContent = (plan === "pro" ? "Pro · up to 5 recipients" : "Standard · 1 recipient");
+    var have = box.querySelectorAll(".slot").length;
+    for (var i = have; i < n; i++) {
+      var d = document.createElement("div"); d.className = "slot"; d.setAttribute("data-i", i);
+      d.innerHTML = '<div class="n">' + (i + 1) + '</div>' +
+        '<div><label>Name / role</label><input class="s_label" placeholder="' + (i === 0 ? "Dr. Nino" : i === 1 ? "Receptionist" : "Manager") + '"></div>' +
+        '<div><label>Channel</label><select class="s_ch"><option value="telegram">Telegram</option><option value="whatsapp">WhatsApp</option></select></div>' +
+        '<div class="s_numwrap" style="visibility:hidden"><label>WhatsApp number</label><input class="s_num" placeholder="+995 555 12 34 56"></div>' +
+        '<button class="s_go">Create link</button>' +
+        '<div class="res"></div>';
+      box.appendChild(d);
+    }
+    box.querySelectorAll(".slot").forEach(function(el, i){ el.hidden = i >= n; });
+  }
+  $("c_plan").onchange = renderSlots;
+  $("a_slug").oninput = renderSlots;
+  $("slots").onchange = function(e){
+    if (!e.target.classList.contains("s_ch")) return;
+    var row = e.target.closest(".slot"), wa = e.target.value === "whatsapp";
+    row.querySelector(".s_numwrap").style.visibility = wa ? "visible" : "hidden";
+    row.querySelector(".s_go").textContent = wa ? "Add WhatsApp" : "Create link";
+  };
+  $("slots").onclick = async function(e){
+    var b = e.target.closest ? e.target.closest(".s_go") : null;
+    if (!b) return;
+    var row = b.closest(".slot"), res = row.querySelector(".res");
+    var label = row.querySelector(".s_label").value.trim() || undefined;
+    if (!slug()) { res.innerHTML = '<span style="color:var(--bad)">Add the clinic first (or type its short code above).</span>'; return; }
+    b.disabled = true;
+    var d;
+    if (row.querySelector(".s_ch").value === "telegram") {
+      d = await call("POST", "/api/admin/telegram-link", { slug: slug(), label: label });
+      res.innerHTML = d.link
+        ? '<a class="link" href="' + esc(d.link) + '" target="_blank" rel="noopener">' + esc(d.link) + '</a><span class="muted">Send this to ' + esc(label || "them") + '. It works once and expires in 7 days.</span> <a href="#" class="s_copy" data-link="' + esc(d.link) + '">Copy</a>'
+        : '<span style="color:var(--bad)">' + esc(d.error || "Something went wrong") + '</span>';
+    } else {
+      d = await call("POST", "/api/admin/alert-target", { slug: slug(), channel: "whatsapp", target: row.querySelector(".s_num").value.trim(), label: label });
+      res.innerHTML = d.error ? '<span style="color:var(--bad)">' + esc(d.error) + '</span>' : '<span style="color:var(--good);font-weight:600">✓ WhatsApp added</span>';
+    }
+    b.disabled = false;
     show(d);
   };
+  $("slots").addEventListener("click", async function(e){
+    if (!e.target.classList.contains("s_copy")) return; e.preventDefault();
+    try { await navigator.clipboard.writeText(e.target.getAttribute("data-link")); e.target.textContent = "Copied ✓"; } catch(err) {}
+  });
 
-  $("wa_add").onclick = async function(){
-    show(await call("POST", "/api/admin/alert-target", { slug: slug(), channel: "whatsapp", target: $("wa_num").value.trim(), label: $("a_label").value.trim() || undefined }));
-  };
+  // ---- tabs ----
+  function showTab(name){
+    document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("active", t.getAttribute("data-tab") === name); });
+    $("pane_onboard").hidden = name !== "onboard";
+    $("pane_clinics").hidden = name !== "clinics";
+    if (name === "clinics") loadClinics();
+  }
+  document.querySelectorAll(".tab").forEach(function(t){ t.onclick = function(){ showTab(t.getAttribute("data-tab")); }; });
+  renderSlots();
 
   $("list").onclick = async function(){
     var d = await call("GET", "/api/admin/alert-targets?slug=" + encodeURIComponent(slug()));
