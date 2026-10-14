@@ -51,7 +51,7 @@
   <div id="tools" class="locked">
   <section class="card">
     <h2>Your clinics</h2>
-    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted. To delete a clinic for good, pause it first; a <b>Remove…</b> button then appears.</div>
+    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted. <b>Remove…</b> deletes a clinic for good, and asks you to type its short code and your admin password again first.</div>
     <input id="c_filter" placeholder="Search by name or short code" style="margin-top:12px">
     <div class="summary" id="c_summary"></div>
     <div class="tablewrap" id="c_list"></div>
@@ -151,7 +151,7 @@
             "<button class='mini ghost' data-act='use' data-slug='" + esc(c.slug) + "'>Alerts</button>" +
             "<button class='mini ghost' data-act='copy' data-slug='" + esc(c.slug) + "'>Copy QR link</button>" +
             "<button class='mini ghost' data-act='key' data-slug='" + esc(c.slug) + "'>Dashboard key</button>" +
-            (c.active ? "" : "<button class='mini remove' data-act='remove' data-slug='" + esc(c.slug) + "'>Remove…</button>") +
+            "<button class='mini remove' data-act='remove' data-slug='" + esc(c.slug) + "'>Remove…</button>" +
           "</td></tr>";
       }).join("") + "</table>";
   }
@@ -184,7 +184,7 @@
     }
     if (act === "remove") {
       RM = slug;
-      $("rm_name").textContent = c.practice_name || slug;
+      $("rm_name").textContent = (c.practice_name || slug) + (c.active ? " — currently LIVE" : "");
       $("rm_slug").textContent = slug; $("rm_slug2").textContent = slug;
       $("rm_confirm").value = ""; $("rm_tok").value = ""; $("rm_go").disabled = true;
       $("rm_box").hidden = false; $("rm_box").scrollIntoView({ behavior: "smooth", block: "center" });
