@@ -41,15 +41,13 @@ async function tg(env, method, payload) {
 export async function ensureTelegramWebhook(env, origin) {
   const me = await tg(env, "getMe");
   const url = `${origin}/api/telegram/webhook`;
-  const info = await tg(env, "getWebhookInfo");
-  if (info.url !== url) {
-    await tg(env, "setWebhook", {
-      url,
-      secret_token: await telegramWebhookSecret(env),
-      allowed_updates: ["message"],
-      drop_pending_updates: true,
-    });
-  }
+  // Always (re)register: the webhook secret is derived from the bot token, so after a
+  // token is revoked/rotated the old registration would be rejected by our own check.
+  await tg(env, "setWebhook", {
+    url,
+    secret_token: await telegramWebhookSecret(env),
+    allowed_updates: ["message"],
+  });
   return me.username;
 }
 
