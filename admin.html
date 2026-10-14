@@ -23,6 +23,13 @@
   .link{display:block;margin-top:10px;padding:10px;border-radius:10px;background:#e8f4f2;word-break:break-all;font-weight:600}
   table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px} td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
   .locked{opacity:.45;pointer-events:none}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+  .on{background:#dcfae6;color:var(--good)} .off{background:#fee4e2;color:var(--bad)}
+  .clin td{vertical-align:top} .clin .name{font-weight:600} .clin small{color:var(--muted)}
+  .mini{margin:0 4px 4px 0;padding:6px 10px;font-size:12.5px;border-radius:8px}
+  .mini.pause{background:var(--bad)} .mini.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
+  .tablewrap{overflow-x:auto} .summary{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--muted)}
+  .summary b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -38,6 +45,15 @@
   </section>
 
   <div id="tools" class="locked">
+  <section class="card">
+    <h2>Your clinics</h2>
+    <div class="muted">Everyone you add below appears here automatically. <b>Pause</b> switches a clinic off straight away: its QR page stops working, patients can't send notes, and the dentist can't log in to the dashboard. <b>Resume</b> switches everything back on — nothing is deleted.</div>
+    <input id="c_filter" placeholder="Search by name or short code" style="margin-top:12px">
+    <div class="summary" id="c_summary"></div>
+    <div class="tablewrap" id="c_list"></div>
+    <button class="ghost" id="c_refresh">Refresh list</button>
+  </section>
+
   <section class="card">
     <h2>2 · Add a clinic</h2>
     <div class="row">
@@ -97,6 +113,61 @@
   }
   function slug(){ return $("a_slug").value.trim(); }
 
+  var CLINICS = [];
+  function fmtDate(s){ return s ? String(s).slice(0,10) : ""; }
+  function renderClinics(){
+    var q = $("c_filter").value.trim().toLowerCase();
+    var rows = CLINICS.filter(function(c){ return !q || (c.practice_name||"").toLowerCase().indexOf(q) >= 0 || c.slug.indexOf(q) >= 0; });
+    var live = CLINICS.filter(function(c){ return c.active; }).length;
+    $("c_summary").innerHTML = "<span><b>" + CLINICS.length + "</b> clinics</span><span><b>" + live + "</b> live</span><span><b>" + (CLINICS.length - live) + "</b> paused</span>";
+    if (!rows.length) { $("c_list").innerHTML = '<div class="muted" style="margin-top:10px">' + (CLINICS.length ? "No clinic matches that search." : "No clinics yet — add your first one below.") + "</div>"; return; }
+    $("c_list").innerHTML = '<table class="clin"><tr><th>Clinic</th><th>Plan</th><th>Status</th><th>Scans (30d)</th><th>Notes</th><th>Alerts</th><th>Added</th><th></th></tr>' +
+      rows.map(function(c){
+        return "<tr><td><div class='name'>" + esc(c.practice_name) + "</div><small>" + esc(c.slug) + (c.doctor_name ? " · " + esc(c.doctor_name) : "") + "</small></td>" +
+          "<td>" + esc(c.plan) + "<br><small>" + esc(c.market) + "</small></td>" +
+          "<td><span class='badge " + (c.active ? "on'>Live" : "off'>Paused") + "</span></td>" +
+          "<td>" + c.scans_30d + "</td><td>" + c.notes_total + "</td>" +
+          "<td><small>email" + (c.messengers ? " + " + c.messengers + " messenger" + (c.messengers > 1 ? "s" : "") : "") + "</small></td>" +
+          "<td><small>" + fmtDate(c.created_at) + "</small></td>" +
+          "<td style='min-width:190px'>" +
+            (c.active ? "<button class='mini pause' data-act='pause' data-slug='" + esc(c.slug) + "'>Pause</button>"
+                      : "<button class='mini' data-act='resume' data-slug='" + esc(c.slug) + "'>Resume</button>") +
+            "<button class='mini ghost' data-act='use' data-slug='" + esc(c.slug) + "'>Alerts</button>" +
+            "<button class='mini ghost' data-act='copy' data-slug='" + esc(c.slug) + "'>Copy QR link</button>" +
+            "<button class='mini ghost' data-act='key' data-slug='" + esc(c.slug) + "'>Dashboard key</button>" +
+          "</td></tr>";
+      }).join("") + "</table>";
+  }
+  async function loadClinics(){
+    var d = await call("GET", "/api/admin/clinics");
+    if (d.error) return show(d);
+    CLINICS = d.clinics || [];
+    renderClinics();
+  }
+  $("c_filter").oninput = renderClinics;
+  $("c_refresh").onclick = loadClinics;
+  $("c_list").onclick = async function(e){
+    var b = e.target.closest ? e.target.closest("button[data-act]") : null;
+    if (!b) return;
+    var slug = b.getAttribute("data-slug"), act = b.getAttribute("data-act");
+    var c = CLINICS.filter(function(x){ return x.slug === slug; })[0] || {};
+    if (act === "pause" || act === "resume") {
+      var pause = act === "pause";
+      if (!confirm((pause ? "Pause " : "Resume ") + (c.practice_name || slug) + "?\n\n" + (pause
+          ? "Their QR page, patient notes and dashboard login stop working right away."
+          : "Their QR page, patient notes and dashboard login start working again."))) return;
+      show(await call("POST", "/api/admin/clinic/status", { slug: slug, active: !pause }));
+      return loadClinics();
+    }
+    if (act === "use") { $("a_slug").value = slug; $("a_slug").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+    if (act === "copy") {
+      var link = "https://trychairside.com/scan.html?p=" + slug;
+      try { await navigator.clipboard.writeText(link); show("Copied: " + link); } catch(err) { show(link); }
+      return;
+    }
+    if (act === "key") { show("Dashboard login for " + (c.practice_name || slug) + "\nEmail: " + (c.email || "") + "\nKey: " + (c.access_token || "")); return; }
+  };
+
   $("unlock").onclick = async function(){
     TOKEN = $("tok").value.trim();
     $("tok").value = "";
@@ -105,6 +176,7 @@
     if (d.error) { TOKEN = ""; return show("That token didn't work: " + d.error); }
     $("tools").classList.remove("locked");
     show("Unlocked.");
+    loadClinics();
   };
 
   $("add_clinic").onclick = async function(){
@@ -113,7 +185,7 @@
       doctor_name: $("c_doc").value.trim() || undefined, email: $("c_email").value.trim(),
       google_url: $("c_google").value.trim() || undefined, market: $("c_market").value, plan: $("c_plan").value
     });
-    if (d.slug) { $("a_slug").value = d.slug; d.full_scan_link = "https://trychairside.com" + d.scan_url; }
+    if (d.slug) { $("a_slug").value = d.slug; d.full_scan_link = "https://trychairside.com" + d.scan_url; loadClinics(); }
     show(d);
   };
 
