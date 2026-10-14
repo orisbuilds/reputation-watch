@@ -27,6 +27,8 @@
  *   GET  /api/admin/alert-targets?slug=…                      -> list recipients
  *   POST /api/admin/alert-target/remove {id}                  -> switch a recipient off
  *   POST /api/admin/alert-test      {slug}                    -> send a test alert to every recipient
+ *   GET  /api/admin/clinics                                   -> every clinic, newest first, with scans (30d), notes, messengers
+ *   POST /api/admin/clinic/status   {slug, active:true|false} -> resume / pause a clinic
  *   POST /api/telegram/webhook      (Telegram only, checked with a secret header)
  *
  * Markets & plans (drive which languages the patient scan page offers):
@@ -321,9 +323,31 @@ export default {
       }
 
       // ---- alert recipients (admin only) ----
-      if (path.startsWith("/api/admin/alert") || path === "/api/admin/telegram-link") {
+      if (path.startsWith("/api/admin/") && path !== "/api/admin/plan") {
         if (!env.ADMIN_TOKEN || bearer(request) !== env.ADMIN_TOKEN)
           return json({ error: "admin token required" }, 401);
+
+        // ---- all clinics, newest first, with a few health numbers ----
+        if (path === "/api/admin/clinics" && request.method === "GET") {
+          const rows = await env.DB.prepare(
+            "SELECT d.slug, d.practice_name, d.doctor_name, d.email, d.google_url, d.market, d.plan, d.active, d.created_at, d.access_token, " +
+            "(SELECT COUNT(*) FROM events e WHERE e.slug = d.slug AND e.action = 'scan' AND e.created_at >= datetime('now','-30 days')) AS scans_30d, " +
+            "(SELECT COUNT(*) FROM complaints c WHERE c.slug = d.slug) AS notes_total, " +
+            "(SELECT COUNT(*) FROM alert_targets t WHERE t.slug = d.slug AND t.active = 1) AS messengers " +
+            "FROM dentists d ORDER BY d.created_at DESC"
+          ).all();
+          return json({ clinics: (rows.results || []).map((r) => ({ ...r, active: r.active === 0 ? 0 : 1, plan: planOf(r), market: marketOf(r) })) });
+        }
+
+        // ---- pause / resume a clinic (paused = scan page off, no new notes, no dashboard login) ----
+        if (path === "/api/admin/clinic/status" && request.method === "POST") {
+          const slug = slugify(body.slug);
+          const row = slug && await env.DB.prepare("SELECT slug FROM dentists WHERE slug = ?").bind(slug).first();
+          if (!row) return json({ error: "unknown practice" }, 404);
+          const active = body.active ? 1 : 0;
+          await env.DB.prepare("UPDATE dentists SET active = ? WHERE slug = ?").bind(active, slug).run();
+          return json({ ok: true, slug, active });
+        }
 
         if (path === "/api/admin/telegram-link" && request.method === "POST") {
           if (!env.TELEGRAM_BOT_TOKEN) return json({ error: "TELEGRAM_BOT_TOKEN is not set" }, 400);
