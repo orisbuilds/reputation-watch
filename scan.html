@@ -134,7 +134,7 @@
       </div>
       <p class="sub" data-t="ask_sub">Your feedback helps us take better care of you.</p>
       <div class="choice">
-        <button class="bigbtn happy" onclick="go('happy')"><span class="emo">😊</span> <span data-t="good">I had a good experience</span></button>
+        <button class="bigbtn happy" onclick="goHappy()"><span class="emo">😊</span> <span data-t="good">I had a good experience</span></button>
         <button class="bigbtn sad" onclick="go('sad')"><span class="emo">😕</span> <span data-t="bad">Something wasn't right</span></button>
       </div>
     </div>
@@ -143,7 +143,8 @@
     <div class="screen" id="s-happy">
       <p class="prompt" data-t="happy_title">That's wonderful to hear! 🎉</p>
       <p class="sub"><span data-t="happy_sub">Would you take a moment to share a quick Google review?</span><span id="doctorNudge"></span></p>
-      <a class="cta" id="googleCta" href="#" target="_blank" rel="noopener" onclick="track('google')">
+      <p class="sub" id="redirNote" style="font-weight:600;color:var(--brand);display:none"><span data-t="redirecting">Opening Google reviews…</span></p>
+      <a class="cta" id="googleCta" href="#" rel="noopener">
         <svg class="gicon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z" opacity=".0"/><path fill="#fff" d="M24 19v6h8.4c-.9 2.7-3.4 4.6-6.4 4.6-3.9 0-7-3.1-7-7s3.1-7 7-7c1.7 0 3.3.6 4.5 1.7L34 14C31.9 12.1 28.6 11 24 11c-7.2 0-13 5.8-13 13s5.8 13 13 13c7.5 0 12.4-5.3 12.4-12.7 0-.9-.1-1.6-.2-2.3H24z"/></svg>
         <span data-t="review_btn">Write a Google review</span>
       </a>
@@ -215,7 +216,7 @@
       good:"I had a good experience", bad:"Something wasn't right",
       happy_title:"That's wonderful to hear! 🎉", happy_sub:"Would you take a moment to share a quick Google review?",
       nudge:" If a particular person made your visit better, feel free to mention {name}.",
-      review_btn:"Write a Google review", thanks_help:"Thanks for helping other patients find us.", back:"← Back",
+      redirecting:"Opening Google reviews…", review_btn:"Write a Google review", thanks_help:"Thanks for helping other patients find us.", back:"← Back",
       sad_title:"We're sorry to hear that.", sad_sub:"Tell us what happened and it goes straight to the office — privately. We read every note.",
       l_msg:"What went wrong?", ph_msg:"Tell us in your own words…", l_name:"Your name", optional:"(optional)",
       ph_name:"So we can follow up with you", l_contact:"Phone or email", ph_contact:"Best way to reach you",
@@ -234,7 +235,7 @@
       good:"ყველაფერი მომეწონა", bad:"რაღაც არ მომეწონა",
       happy_title:"გვიხარია, რომ კმაყოფილი დარჩით! 🎉", happy_sub:"გთხოვთ, დაუთმოთ ერთი წუთი და დაგვიტოვოთ მოკლე შეფასება Google-ზე.",
       nudge:" თუ ვინმე განსაკუთრებით დაგეხმარათ, შეგიძლიათ შეფასებაში მოიხსენიოთ: {name}.",
-      review_btn:"შეფასების დაწერა Google-ზე", thanks_help:"მადლობა — თქვენი შეფასება სხვა პაციენტებსაც დაეხმარება.", back:"← უკან",
+      redirecting:"იხსნება Google-ის შეფასებების გვერდი…", review_btn:"შეფასების დაწერა Google-ზე", thanks_help:"მადლობა — თქვენი შეფასება სხვა პაციენტებსაც დაეხმარება.", back:"← უკან",
       sad_title:"ვწუხვართ, რომ ასე მოხდა.", sad_sub:"მოგვწერეთ, რა მოხდა — შეტყობინება პირდაპირ კლინიკას მიუვა და საჯაროდ არ გამოქვეყნდება. ყველა შეტყობინებას ვკითხულობთ.",
       l_msg:"რა არ მოგეწონათ?", ph_msg:"მოგვწერეთ დეტალურად…", l_name:"თქვენი სახელი", optional:"(არასავალდებულო)",
       ph_name:"რათა დაგიკავშირდეთ", l_contact:"ტელეფონი ან ელფოსტა", ph_contact:"როგორ დაგიკავშირდეთ?",
@@ -253,7 +254,7 @@
       good:"Мне всё понравилось", bad:"Что-то было не так",
       happy_title:"Рады это слышать! 🎉", happy_sub:"Не могли бы вы уделить минуту и оставить короткий отзыв в Google?",
       nudge:" Если кто-то из сотрудников сделал ваш визит особенно приятным, можете упомянуть в отзыве: {name}.",
-      review_btn:"Оставить отзыв в Google", thanks_help:"Спасибо, что помогаете другим пациентам найти нас.", back:"← Назад",
+      redirecting:"Открываем отзывы Google…", review_btn:"Оставить отзыв в Google", thanks_help:"Спасибо, что помогаете другим пациентам найти нас.", back:"← Назад",
       sad_title:"Нам очень жаль.", sad_sub:"Расскажите, что произошло. Сообщение придёт напрямую в клинику и не будет опубликовано. Мы читаем каждое сообщение.",
       l_msg:"Что пошло не так?", ph_msg:"Расскажите своими словами…", l_name:"Ваше имя", optional:"(необязательно)",
       ph_name:"Чтобы мы могли связаться с вами", l_contact:"Телефон или email", ph_contact:"Как с вами лучше связаться",
@@ -272,7 +273,7 @@
       good:"הייתה לי חוויה טובה", bad:"משהו לא היה בסדר",
       happy_title:"שמחים לשמוע! 🎉", happy_sub:"נשמח אם תקדישו רגע לכתוב ביקורת קצרה בגוגל.",
       nudge:" אם מישהו מהצוות תרם במיוחד לביקור שלכם, מוזמנים להזכיר בביקורת את {name}.",
-      review_btn:"לכתיבת ביקורת בגוגל", thanks_help:"תודה שאתם עוזרים למטופלים אחרים למצוא אותנו.", back:"→ חזרה",
+      redirecting:"פותחים את דף הביקורות בגוגל…", review_btn:"לכתיבת ביקורת בגוגל", thanks_help:"תודה שאתם עוזרים למטופלים אחרים למצוא אותנו.", back:"→ חזרה",
       sad_title:"מצטערים לשמוע.", sad_sub:"ספרו לנו מה קרה, וההודעה תגיע ישירות למרפאה — באופן פרטי. אנחנו קוראים כל הודעה.",
       l_msg:"מה השתבש?", ph_msg:"ספרו לנו במילים שלכם…", l_name:"השם שלכם", optional:"(לא חובה)",
       ph_name:"כדי שנוכל לחזור אליכם", l_contact:"טלפון או אימייל", ph_contact:"הדרך הטובה ביותר ליצור איתכם קשר",
@@ -346,13 +347,31 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
+  // Happy patient: count it, show a short thank-you, then send them straight to the clinic's Google review page.
+  // The button stays on screen as a fallback in case the redirect is blocked or slow.
+  let REDIR = null;
+  function googleUrl(){ return PRACTICE && PRACTICE.google_url ? PRACTICE.google_url : ""; }
+  function goHappy(){
+    go('happy');
+    track('happy');
+    const g = googleUrl();
+    clearTimeout(REDIR);
+    if (!g || !LIVE) return;
+    document.getElementById('redirNote').style.display = 'block';
+    REDIR = setTimeout(function(){ window.location.href = g; }, 2500);
+  }
+  document.addEventListener('click', function(e){
+    // leaving the happy screen (Back) cancels the pending redirect
+    if (e.target.closest && e.target.closest('#s-happy .back')) { clearTimeout(REDIR); document.getElementById('redirNote').style.display='none'; }
+  });
+
   function track(what){
     // 'what' here is the button label; map to a backend action
     const action = what === 'google' ? 'happy' : what;
     if (!LIVE){ console.log('[ReputationWatch demo] tracked', action); return; }
     fetch(API_BASE + '/api/track', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ slug: SLUG, action })
+      body: JSON.stringify({ slug: SLUG, action }), keepalive: true
     }).catch(e=>console.warn('track failed', e));
   }
 
