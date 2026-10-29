@@ -94,6 +94,13 @@
     width:66px;height:66px;border-radius:50%; margin:6px auto 16px;
     background:var(--good); color:#fff; display:grid; place-items:center; font-size:34px;
   }
+  .nudge{display:none;margin-top:14px;padding:14px;border-radius:12px;background:#fff7e6;border:1.5px solid #f5c26b;font-size:14px;line-height:1.45}
+  .nudge.show{display:block}
+  .nudge b{display:block;margin-bottom:4px}
+  .nudge .row2{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .nudge button{flex:1;min-width:120px;padding:10px 12px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1.5px solid var(--brand)}
+  .nudge .add{background:var(--brand);color:#fff}
+  .nudge .skip{background:#fff;color:var(--brand)}
   .softlink{display:block; text-align:center; margin-top:20px; font-size:12.5px; color:var(--muted);}
   .softlink a{color:var(--muted); text-decoration:underline;}
   .back{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:18px;display:block;width:100%;}
@@ -161,8 +168,16 @@
         <textarea id="msg" required placeholder="Tell us in your own words…" data-tph="ph_msg"></textarea>
         <label for="name"><span data-t="l_name">Your name</span> <span style="font-weight:400;color:var(--muted)" data-t="optional">(optional)</span></label>
         <input id="name" type="text" placeholder="So we can follow up with you" data-tph="ph_name">
-        <label for="contact"><span data-t="l_contact">Phone or email</span> <span style="font-weight:400;color:var(--muted)" data-t="optional">(optional)</span></label>
+        <label for="contact"><span data-t="l_contact">Phone or email</span> <span style="font-weight:400;color:var(--muted)" data-t="reply_hint">(so the clinic can reply)</span></label>
         <input id="contact" type="text" placeholder="Best way to reach you" data-tph="ph_contact">
+        <div class="nudge" id="nudge" role="alert">
+          <b data-t="nudge_t">Without a phone or email, the clinic can't get back to you.</b>
+          <span data-t="nudge_q">Add one so they can make it right?</span>
+          <div class="row2">
+            <button type="button" class="add" id="nudgeAdd" data-t="nudge_add">Add contact</button>
+            <button type="button" class="skip" id="nudgeSkip" data-t="nudge_skip">Send anyway</button>
+          </div>
+        </div>
         <button class="cta" type="submit" style="margin-top:20px;" data-t="send">Send privately to the office</button>
       </form>
       <span class="softlink"><span data-t="public_q">Prefer to post publicly instead?</span> <a id="googleSoft" href="#" target="_blank" rel="noopener" data-t="public_a">Leave a Google review</a>.</span>
@@ -219,7 +234,7 @@
       redirecting:"Opening Google reviews…", review_btn:"Write a Google review", thanks_help:"Thanks for helping other patients find us.", back:"← Back",
       sad_title:"We're sorry to hear that.", sad_sub:"Tell us what happened and it goes straight to the office — privately. We read every note.",
       l_msg:"What went wrong?", ph_msg:"Tell us in your own words…", l_name:"Your name", optional:"(optional)",
-      ph_name:"So we can follow up with you", l_contact:"Phone or email", ph_contact:"Best way to reach you",
+      ph_name:"So we can follow up with you", l_contact:"Phone or email", ph_contact:"Best way to reach you", reply_hint:"(so the clinic can reply)", nudge_t:"Without a phone or email, the clinic can't get back to you.", nudge_q:"Add one so they can make it right?", nudge_add:"Add contact", nudge_skip:"Send anyway",
       send:"Send privately to the office", sending:"Sending…",
       public_q:"Prefer to post publicly instead?", public_a:"Leave a Google review", priv_note:"Your note goes only to this clinic, and your details are used only to reply to you.", priv_link:"Privacy policy",
       done_title:"Thank you.", done_sub:"The office will personally look into this. If you left your contact details, someone will reach out.",
@@ -238,7 +253,7 @@
       redirecting:"იხსნება Google-ის შეფასებების გვერდი…", review_btn:"შეფასების დაწერა Google-ზე", thanks_help:"მადლობა — თქვენი შეფასება სხვა პაციენტებსაც დაეხმარება.", back:"← უკან",
       sad_title:"ვწუხვართ, რომ ასე მოხდა.", sad_sub:"მოგვწერეთ, რა მოხდა — შეტყობინება პირდაპირ კლინიკას მიუვა და საჯაროდ არ გამოქვეყნდება. ყველა შეტყობინებას ვკითხულობთ.",
       l_msg:"რა არ მოგეწონათ?", ph_msg:"მოგვწერეთ დეტალურად…", l_name:"თქვენი სახელი", optional:"(არასავალდებულო)",
-      ph_name:"რათა დაგიკავშირდეთ", l_contact:"ტელეფონი ან ელფოსტა", ph_contact:"როგორ დაგიკავშირდეთ?",
+      ph_name:"რათა დაგიკავშირდეთ", l_contact:"ტელეფონი ან ელფოსტა", ph_contact:"როგორ დაგიკავშირდეთ?", reply_hint:"(რომ კლინიკამ გიპასუხოთ)", nudge_t:"ტელეფონის ან ელფოსტის გარეშე კლინიკა ვერ შეძლებს თქვენთან დაკავშირებას.", nudge_q:"დაამატებთ, რომ პრობლემა მოგიგვარონ?", nudge_add:"კონტაქტის დამატება", nudge_skip:"მაინც გაგზავნა",
       send:"კონფიდენციალურად გაგზავნა", sending:"იგზავნება…",
       public_q:"გირჩევნიათ საჯაროდ დაწეროთ?", public_a:"დატოვეთ შეფასება Google-ზე", priv_note:"თქვენი შეტყობინება მხოლოდ ამ კლინიკას მიუვა, თქვენს მონაცემებს კი მხოლოდ თქვენთან დასაკავშირებლად გამოვიყენებთ.", priv_link:"კონფიდენციალურობის პოლიტიკა",
       done_title:"გმადლობთ.", done_sub:"კლინიკა პირადად განიხილავს თქვენს შეტყობინებას. თუ საკონტაქტო მონაცემები დატოვეთ, დაგიკავშირდებიან.",
@@ -257,7 +272,7 @@
       redirecting:"Открываем отзывы Google…", review_btn:"Оставить отзыв в Google", thanks_help:"Спасибо, что помогаете другим пациентам найти нас.", back:"← Назад",
       sad_title:"Нам очень жаль.", sad_sub:"Расскажите, что произошло. Сообщение придёт напрямую в клинику и не будет опубликовано. Мы читаем каждое сообщение.",
       l_msg:"Что пошло не так?", ph_msg:"Расскажите своими словами…", l_name:"Ваше имя", optional:"(необязательно)",
-      ph_name:"Чтобы мы могли связаться с вами", l_contact:"Телефон или email", ph_contact:"Как с вами лучше связаться",
+      ph_name:"Чтобы мы могли связаться с вами", l_contact:"Телефон или email", ph_contact:"Как с вами лучше связаться", reply_hint:"(чтобы клиника могла ответить)", nudge_t:"Без телефона или email клиника не сможет с вами связаться.", nudge_q:"Добавите, чтобы они могли всё исправить?", nudge_add:"Добавить контакт", nudge_skip:"Отправить без контакта",
       send:"Отправить конфиденциально", sending:"Отправка…",
       public_q:"Хотите написать публично?", public_a:"Оставить отзыв в Google", priv_note:"Ваше сообщение получит только эта клиника, а ваши данные будут использованы только для ответа вам.", priv_link:"Политика конфиденциальности",
       done_title:"Спасибо.", done_sub:"Клиника лично рассмотрит ваше сообщение. Если вы оставили контакты, с вами свяжутся.",
@@ -276,7 +291,7 @@
       redirecting:"פותחים את דף הביקורות בגוגל…", review_btn:"לכתיבת ביקורת בגוגל", thanks_help:"תודה שאתם עוזרים למטופלים אחרים למצוא אותנו.", back:"→ חזרה",
       sad_title:"מצטערים לשמוע.", sad_sub:"ספרו לנו מה קרה, וההודעה תגיע ישירות למרפאה — באופן פרטי. אנחנו קוראים כל הודעה.",
       l_msg:"מה השתבש?", ph_msg:"ספרו לנו במילים שלכם…", l_name:"השם שלכם", optional:"(לא חובה)",
-      ph_name:"כדי שנוכל לחזור אליכם", l_contact:"טלפון או אימייל", ph_contact:"הדרך הטובה ביותר ליצור איתכם קשר",
+      ph_name:"כדי שנוכל לחזור אליכם", l_contact:"טלפון או אימייל", ph_contact:"הדרך הטובה ביותר ליצור איתכם קשר", reply_hint:"(כדי שהמרפאה תוכל לחזור אליכם)", nudge_t:"בלי טלפון או אימייל המרפאה לא תוכל לחזור אליכם.", nudge_q:"תוסיפו כדי שיוכלו לתקן את זה?", nudge_add:"הוספת פרטי קשר", nudge_skip:"לשלוח בכל זאת",
       send:"שליחה פרטית למרפאה", sending:"בשליחה…",
       public_q:"מעדיפים לפרסם באופן פומבי?", public_a:"השאירו ביקורת בגוגל", priv_note:"ההודעה שלכם תגיע רק למרפאה הזו, והפרטים שלכם ישמשו רק כדי לחזור אליכם.", priv_link:"מדיניות פרטיות",
       done_title:"תודה.", done_sub:"המרפאה תבדוק את הפנייה באופן אישי. אם השארתם פרטי קשר, יחזרו אליכם.",
@@ -408,8 +423,26 @@
   }
   loadPractice();
 
+  // Contact nudge: the first Send with an empty phone/email shows a reminder; "Send anyway" still sends.
+  let SKIP_CONTACT = false;
+  document.getElementById('nudgeAdd').onclick = function(){
+    document.getElementById('nudge').classList.remove('show');
+    document.getElementById('contact').focus();
+  };
+  document.getElementById('nudgeSkip').onclick = function(){
+    SKIP_CONTACT = true;
+    document.getElementById('nudge').classList.remove('show');
+    document.querySelector('#s-sad form').requestSubmit();
+  };
+  document.getElementById('contact').addEventListener('input', function(){ document.getElementById('nudge').classList.remove('show'); });
+
   async function submitComplaint(e){
     e.preventDefault();
+    if (!document.getElementById('contact').value.trim() && !SKIP_CONTACT){
+      const n = document.getElementById('nudge'); n.classList.add('show');
+      n.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
     const payload = {
       slug: SLUG,
       message: document.getElementById('msg').value,
