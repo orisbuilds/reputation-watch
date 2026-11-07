@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Chairside Demo — Review Page</title>
+<style>
+  :root{--ink:#10201e;--ink-2:#3d4f4c;--muted:#6b7b78;--brand:#0f766e;--brand-dark:#0b5a54;--bg:#eef3f2;--card:#fff;--line:#e2e8e6;--star:#f4b400}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:440px;margin:0 auto;padding:28px 16px 40px}
+  .tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brand);background:#dff1ee;border-radius:999px;padding:4px 10px}
+  h1{font-size:23px;line-height:1.3;margin:14px 0 6px}
+  .sub{color:var(--ink-2);margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;box-shadow:0 6px 20px rgba(16,32,30,.06)}
+  .mock .name{font-weight:700;font-size:17px}
+  .mock .muted{color:var(--muted);font-size:13px}
+  .stars{display:flex;gap:6px;margin:16px 0 14px}
+  .stars span{font-size:34px;line-height:1;color:var(--star)}
+  .box{border:1.5px solid var(--line);border-radius:12px;padding:12px;color:var(--muted);font-size:14px;min-height:76px}
+  .post{margin-top:14px;text-align:right}
+  .post span{display:inline-block;background:var(--brand);color:#fff;font-weight:600;border-radius:10px;padding:9px 18px;font-size:14px;opacity:.9}
+  .how{margin-top:22px}
+  .how h2{font-size:16px;margin:0 0 8px}
+  .how p{margin:0 0 10px;color:var(--ink-2);font-size:15px}
+  .cta{display:block;text-align:center;margin-top:18px;background:var(--brand);color:#fff;text-decoration:none;font-weight:700;border-radius:14px;padding:14px}
+  .cta:hover{background:var(--brand-dark)}
+  .ghost{display:block;text-align:center;margin-top:10px;color:var(--brand);font-weight:600;text-decoration:none}
+  .foot{margin-top:26px;text-align:center;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">Demo</span>
+  <h1>This is where your Google review page opens.</h1>
+  <p class="sub">When a happy patient taps 😊, Chairside sends them straight to <b>your</b> Google review page, with the star rating ready to tap. Posting a review takes them seconds.</p>
+
+  <div class="card mock" aria-label="Example of the review screen a patient sees">
+    <div class="name">Your Dental Practice</div>
+    <div class="muted">Rate and review · Posting publicly on Google</div>
+    <div class="stars" aria-hidden="true"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+    <div class="box">Share details of your own experience at this place…</div>
+    <div class="post"><span>Post</span></div>
+  </div>
+
+  <div class="how">
+    <h2>What happens at your practice</h2>
+    <p>😊 <b>Happy patients</b> are directed to your Google review page immediately, while the visit is still fresh.</p>
+    <p>😕 <b>Unhappy patients</b> get a private form instead. Their note reaches your inbox the moment it's sent, so you can call them and put it right.</p>
+    <p>📊 You see every scan, every happy patient and every private note on a live dashboard, plus a monthly report.</p>
+  </div>
+
+  <a class="cta" href="/scan.html?p=demo">Try the unhappy-patient side →</a>
+  <a class="ghost" href="/">Learn more about Chairside</a>
+
+  <div class="foot">Chairside · demo page · not a real Google review</div>
+</main>
+</body>
+</html>
