@@ -99,14 +99,16 @@
       <div><label>Doctor / contact name</label><input id="c_doc"></div>
       <div><label>Alert email</label><input id="c_email" type="email"></div>
       <div><label>Google review link</label><input id="c_google" placeholder="https://g.page/r/…/review"></div>
-      <div><label>Market</label><select id="c_market"><option value="ge">Georgia (ge)</option><option value="us">US (us)</option></select></div>
-      <div><label>Plan</label><select id="c_plan"><option value="standard">Standard — 1 Telegram/WhatsApp recipient</option><option value="pro">Pro (also launch offer) — up to 5 recipients</option></select></div>
+      <div><label>Market</label><select id="c_market"><option value="us">US (us)</option><option value="ge">Georgia (ge)</option></select></div>
+      <div id="plan_field"><label>Plan</label><select id="c_plan"><option value="standard">Standard — 1 Telegram/WhatsApp recipient</option><option value="pro">Pro (also launch offer) — up to 5 recipients</option></select></div>
     </div>
+    <div id="price_ref" class="muted" style="margin-top:10px"></div>
     <button id="add_clinic">Add clinic</button>
     <div class="muted" style="margin-top:8px">The result shows the clinic's dashboard password (access_token) and scan link — copy them somewhere safe.</div>
+    <div id="us_alert_note" class="muted" style="margin-top:8px">US clinics: private-note alerts are emailed to the clinic automatically — no Telegram or extra setup needed.</div>
   </section>
 
-  <section class="card">
+  <section class="card" id="alerts_section">
     <h2>3 · Who gets the alerts <span class="planpill" id="a_plan">Standard · 1 recipient</span></h2>
     <div class="muted">Email always goes to the clinic's alert email. On top of that, each row below is one person who also gets every private note on Telegram or WhatsApp. Standard has 1 row, Pro has 5. Telegram doesn't use a phone number: you get a one-time link to send that person, and they tap it to connect.</div>
     <label>Clinic short code</label><input id="a_slug" placeholder="smile-dental">
@@ -275,6 +277,19 @@
   }
   $("c_plan").onchange = renderSlots;
   $("a_slug").oninput = renderSlots;
+
+  // ---- market-aware UI: US = email-only (hide Telegram/WhatsApp + plan), show price reference ----
+  function updateMarketUI(){
+    var us = ($("c_market").value === "us");
+    var pf = $("plan_field"); if (pf) pf.style.display = us ? "none" : "";
+    var as = $("alerts_section"); if (as) as.style.display = us ? "none" : "";
+    var un = $("us_alert_note"); if (un) un.style.display = us ? "" : "none";
+    var pr = $("price_ref");
+    if (pr) pr.innerHTML = us
+      ? 'US pricing — <b>Founding:</b> $149/mo (first 3, no setup) · <b>Standard:</b> $299/mo + $300 setup · <b>Annual:</b> ~$249/mo (2 months free, setup waived)'
+      : 'GE pricing — <b>Standard:</b> 199 ₾/mo · <b>Pro:</b> 449 ₾/mo';
+  }
+  $("c_market").onchange = updateMarketUI;
   $("slots").onchange = function(e){
     if (!e.target.classList.contains("s_ch")) return;
     var row = e.target.closest(".slot"), wa = e.target.value === "whatsapp";
@@ -315,6 +330,7 @@
   }
   document.querySelectorAll(".tab").forEach(function(t){ t.onclick = function(){ showTab(t.getAttribute("data-tab")); }; });
   renderSlots();
+  updateMarketUI();
 
   $("list").onclick = async function(){
     var d = await call("GET", "/api/admin/alert-targets?slug=" + encodeURIComponent(slug()));
